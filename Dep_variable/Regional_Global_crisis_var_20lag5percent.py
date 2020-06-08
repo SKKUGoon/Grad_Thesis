@@ -69,5 +69,5 @@ glb_crisis_df = pd.DataFrame(glb_crisis, columns = ['global crisis'])
 glb_crisis_df.index = region_crisis.index
 global_regional_df = pd.concat([region_crisis, glb_crisis_df], axis = 1)
 
-global_regional_df.to_csv(r"D:\Data\Grad\1global_regional5p.csv")
+global_regional_df.to_csv(r"D:\Data\Grad\20global_regional5p.csv")
 print(global_regional_df)

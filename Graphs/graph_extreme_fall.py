@@ -12,6 +12,8 @@ countries_asia_dat = countries_asia_dat.set_index(countries_asia_dat.columns[0])
 
 # Lag20
 CrisisData_20lag = pd.read_csv(r"D:\Data\Grad\20lag_crisis_5p.csv", index_col = 0) # lag 1
+print(CrisisData_20lag)
+
 for_graph_temp = CrisisData_20lag[1502:6809]
 for_graph = pd.DataFrame(for_graph_temp.sum(), columns = ['incidents'])
 # Country-wise Crisis Incidents
