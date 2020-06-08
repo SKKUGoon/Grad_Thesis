@@ -1,9 +1,9 @@
 import pandas as pd
 import numpy as np
 import datetime
-from Methods import preprocessing
+from Dep_variable.Methods import preprocessing
 # Cleaning Data
-Data1 = pd.read_csv(r"D:\Data\Grad\1global_regional.csv") # Transformed global crisis Data
+Data1 = pd.read_csv(r"D:\Data\Grad\20global_regional5p.csv") # Transformed global crisis Data lag 20
 Data1 = Data1.set_index(Data1.columns[0])
 Data1.index = pd.to_datetime(Data1.index)
 
@@ -79,7 +79,6 @@ end_date = datetime.date(2020, 5, 15)
 Work_Data = pd.concat([Data1,
                        Data2[starting_date : ending_date],
                        Data3[starting_date : ending_date],
-                       Data4[starting_date : ending_date],
                        Data5[starting_date : ending_date],
                        lnData5[starting_date : ending_date],
                        ln_return_Data5[starting_date : ending_date],

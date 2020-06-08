@@ -25,19 +25,19 @@ countries_asia_5p = [countries_asia[i] + '5p' for i in range(len(countries_asia)
 # Regional Crisis 1%
 ame_crisis = [] # regional crisis variable 1
 for j in range(len(Data1)):
-    if sum(list(Data1.loc[j, [i for i in countries_ame_1p]])) >= int(len(countries_ame_1p)/2): # if more than int(len(countries_ame_1p)/2) number of countries experience 1% crisis
+    if sum(list(Data1.loc[j, [i for i in countries_ame]])) >= int(len(countries_ame)/2): # if more than int(len(countries_ame_1p)/2) number of countries experience 1% crisis
         ame_crisis.append(1) # it is regional crisis
     else:
         ame_crisis.append(0)
 eu_crisis = [] # regional crisis variable 2
 for j in range(len(Data1)):
-    if sum(list(Data1.loc[j, [i for i in countries_eu_1p]])) >= (int(len(countries_eu_1p)/2) - 2):
+    if sum(list(Data1.loc[j, [i for i in countries_eu]])) >= (int(len(countries_eu)/2) - 2):
         eu_crisis.append(1)
     else:
         eu_crisis.append(0)
 asia_crisis = [] # regional crisis variable 3
 for j in range(len(Data1)):
-    if sum(list(Data1.loc[j, [i for i in countries_asia_1p]])) >= int(len(countries_asia_1p)/2):
+    if sum(list(Data1.loc[j, [i for i in countries_asia]])) >= int(len(countries_asia)/2):
         asia_crisis.append(1)
     else:
         asia_crisis.append(0)
@@ -70,4 +70,4 @@ ending_date = '2020-05-15'
 end_date = datetime.date(2020, 5, 15)
 
 global_regional_df = global_regional_df[starting_date : ending_date]
-global_regional_df.to_csv(r"D:\Data\Grad\20global_regional.csv")
+global_regional_df.to_csv(r"D:\Data\Grad\20global_regional1p.csv")
