@@ -55,6 +55,7 @@ rf_clf = RandomForestClassifier(n_estimators = 100)
 rf_clf.fit(X_fil_train, y_train)
 y_pred_rf = rf_clf.predict((X_test_s[X_fil_train.columns]))
 acc2 = metrics.accuracy_score(y_test, y_pred_rf)
+print('Random forest', acc2)
 # support vector machine
 from sklearn import svm
 svm_clf = svm.SVC()
@@ -62,16 +63,17 @@ svm_clf.fit(X_fil_train, y_train)
 y_pred_svm = svm_clf.predict((X_test_s[X_fil_train.columns]))
 sv = svm_clf.support_vectors_
 acc3 = metrics.accuracy_score(y_test, y_pred_svm)
+print('Support Vector machine', acc3)
 # Neural Networks
 
 # CART
 from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import KFold
-from sklearn import tree
-cv = KFold(n = X_fil_train.shape[0], n_folds = 5, shuffle = True, random_state = 1)
-for i in range(1,10):
-    tree_clf = tree.DecisionTreeClassifier(max_depth = i, random_state = 0)
-    if tree_clf.fit(X_fil_train, y_train).tree_
+#from sklearn.model_selection import KFold
+#from sklearn import tree
+#cv = KFold(n = X_fil_train.shape[0], n_folds = 5, shuffle = True, random_state = 1)
+#for i in range(1,10):
+#    tree_clf = tree.DecisionTreeClassifier(max_depth = i, random_state = 0)
+#    if tree_clf.fit(X_fil_train, y_train).tree_
 from sklearn import tree
 
 
