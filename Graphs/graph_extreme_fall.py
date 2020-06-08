@@ -1,7 +1,13 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
+import datetime
+
 # Graph crisis events by date
-data_indexing = pd.date_range(start='1/2/1997', periods=8535)
+t_starting_date = '2001-12-06'
+t_start_date = datetime.date(2001, 12, 6)
+t_ending_date = '2020-05-15'
+t_end_date = datetime.date(2020, 5, 15)
 
 countries_ame_dat = pd.read_csv(r"D:\Data\Grad\ame_total_dataset.csv")
 countries_ame_dat = countries_ame_dat.set_index(countries_ame_dat.columns[0])
@@ -21,10 +27,22 @@ plt.bar(for_graph.index, for_graph['incidents'])
 plt.show()
 
 # country example
+Data5 = pd.read_csv(r"D:\Data\Grad\total_stock_index_dataset.csv") # Raw stock data (not return)
+Data5 = Data5.set_index(Data5.columns[0])
+Data5.index = pd.to_datetime(Data5.index)
+Data5 = Data5.replace(0, np.nan)
+Data5 = Data5.interpolate(method = 'time')
+
 CrisisData_20lag2 = pd.read_csv(r"D:\Data\Grad\20global_regional5p.csv")
-us = for_graph_temp['US']
+us_stock = Data5['US'][t_starting_date : t_ending_date]
+us = pd.DataFrame(for_graph_temp['US'])
+plt.plot(us_stock, 'r')
+plt.bar(us.index, us['US']*10000)
+plt.show()
+
 
 # How many countries were in crisis(5% percentile)
 Cris = CrisisData_20lag.sum(axis = 1)
 for_graph2 = pd.DataFrame(Cris[1502:6809])
-for_graph2.to_csv(r"D:\Data\Grad\for_graph2.csv")
+Cris = pd.DataFrame(Cris)
+plt.plot(Cris.index, Cris[Cris.columns[0]])
