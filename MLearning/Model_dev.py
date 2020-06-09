@@ -16,6 +16,10 @@ WD = pd.read_csv(r'D:\Data\Grad\test_Work_Data.csv')
 WD = WD.set_index(WD.columns[0])
 WD.index = pd.to_datetime(WD.index)
 
+WD1 = WD[WD.columns[0:4]].fillna(method = 'ffill')
+WD2 = WD[WD.columns[4:1078]].interpolate(method = 'time')
+WD = pd.concat([WD1, WD2], axis = 1)
+
 Indep_var = pd.read_csv(r'D:\Data\Grad\X_filtered.csv')
 Indep_var = Indep_var.set_index(Indep_var.columns[0])
 Indep_var.index = pd.to_datetime(Indep_var.index)
