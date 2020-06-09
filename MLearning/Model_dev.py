@@ -1,10 +1,17 @@
+import numpy as np
 import pandas as pd
 import timeit
 
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
 
 from MLearning.ScoringMethods import scoring_model
+
+from keras.utils import np_utils
+from keras.models import Sequential, load_model
+from keras.layers import Dense, Activation, Dropout
 
 import random
 import warnings
@@ -61,8 +68,8 @@ acc1 = {'gmean' : acc_logR.gmean(),
         'Youden' : acc_logR.Youden(),
         'BA' : acc_logR.BA()}
 print('logistic_regression', acc1)
+
 # Random Forest
-from sklearn.ensemble import RandomForestClassifier
 rf_clf = RandomForestClassifier(n_estimators = 100, max_depth = 15)
 rf_clf.fit(X_train_s, y_train)
 y_pred_rf = rf_clf.predict((X_test_s[X_train_s.columns]))
@@ -93,7 +100,6 @@ acc3 = {'gmean' : acc_svm.gmean(),
 print('Support Vector machine', acc3)
 
 # CART
-from sklearn.tree import DecisionTreeClassifier
 CART_clf = DecisionTreeClassifier(max_depth = 15) # deal with max_depth later
 CART_clf.fit(X_train_s, y_train)
 y_pred_CART = CART_clf.predict(X_test_s)
@@ -108,6 +114,47 @@ print(acc_CART.sensitivity(), acc_CART.specificity())
 print('Classification and Regression Tree', acc4)
 
 # Neural Networks
+model = Sequential()
+model.add(Dense(units = 50, input_dim = len(X_train_s.columns), activation = 'relu'))
+model.add(Dense(units = 1, activation = 'sigmoid'))
+model.compile(loss = 'binary_crossentropy', optimizer = 'sgd')
+
+acc_NN_dict = {'gmean' : [],
+               'LP' : [],
+               'LR' : [],
+               'DP' : [],
+               'Youden' : [],
+               'BA' : []} # store 20 iterations result
+for iter_ in range(0,20):
+        random.seed(iter_)
+        result1 = model.fit(X_train_s, y_train, verbose = 0)
+        y_pred_NN_temp = model.predict(X_test_s)
+        y_pred_NN = []
+        for i in range(len(y_pred_NN_temp)):
+            if y_pred_NN_temp[i] >= 0.5:
+                y_pred_NN.append(1)
+            else:
+                y_pred_NN.append(0)
+        acc_NN = scoring_model(y_test, y_pred_NN)
+
+        # add metrics
+        acc_NN_dict['gmean'].append(acc_NN.gmean())
+        acc_NN_dict['LP'].append(acc_NN.LP())
+        acc_NN_dict['LR'].append(acc_NN.LR())
+        acc_NN_dict['DP'].append(acc_NN.DP())
+        acc_NN_dict['Youden'].append(acc_NN.Youden())
+        acc_NN_dict['BA'].append(acc_NN.BA())
+        # print out phase number 1 ~ 20
+        print('NN iteration phase', (iter_ + 0))
+
+dictkey = list(acc_NN_dict.keys())
+acc5 = {'gmean' : np.mean(acc_NN_dict['gmean']),
+        'LP' : np.mean(acc_NN_dict['LP']),
+        'LR' : np.mean(acc_NN_dict['LR']),
+        'DP' : np.mean(acc_NN_dict['DP']),
+        'Youden' : np.mean(acc_NN_dict['Youden']),
+        'BA' : np.mean(acc_NN_dict['BA'])}
+print('Neural Net', acc5)
 
 
 # XGBoost - Later
