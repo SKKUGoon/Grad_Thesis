@@ -42,7 +42,7 @@ for j in range(len(countries_eu_dat)):
         eu_crisis.append(0)
 asia_crisis = [] # regional crisis variable 3
 for j in range(len(countries_asia_dat)):
-    if Data1[countries_asia].sum(axis = 1)[j] >= int(len(countries_asia_dat)/2):
+    if Data1[countries_asia].sum(axis = 1)[j] >= 4:
         asia_crisis.append(1)
     else:
         asia_crisis.append(0)
