@@ -3,7 +3,7 @@ import numpy as np
 import datetime
 from Dep_variable.Methods import preprocessing
 # Cleaning Data
-Data1 = pd.read_csv(r"D:\Data\Grad\20global_regional5p.csv") # Transformed global crisis Data lag 20
+Data1 = pd.read_csv(r"D:\Data\Grad\20global_regional10p.csv") # Transformed global crisis Data lag 20
 Data1 = Data1.set_index(Data1.columns[0])
 Data1.index = pd.to_datetime(Data1.index)
 

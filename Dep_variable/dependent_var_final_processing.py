@@ -56,3 +56,13 @@ crisis_var_20lag = pd.DataFrame(None)
 for key in crisis_var_20lag_temp.keys():
     crisis_var_20lag = pd.concat([crisis_var_20lag, crisis_var_20lag_temp[key]], axis = 1)
 crisis_var_20lag.to_csv(r"D:\Data\Grad\20lag_crisis_5p.csv")
+
+# 30 lag crisis coding 10% named(20lag_crisis) 20 working days
+crisis_var_20lag_temp = {}
+for i in range(len(Work_Data.columns)):
+    crisis_var_20lag_temp[Work_Data.columns[i]] = WD.crisis_code_200(i, 20, 0.10)
+    print('processing column', i)
+crisis_var_20lag = pd.DataFrame(None)
+for key in crisis_var_20lag_temp.keys():
+    crisis_var_20lag = pd.concat([crisis_var_20lag, crisis_var_20lag_temp[key]], axis = 1)
+crisis_var_20lag.to_csv(r"D:\Data\Grad\20lag_crisis_10p.csv")
