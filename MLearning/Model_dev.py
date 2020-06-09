@@ -16,11 +16,12 @@ WD = pd.read_csv(r'D:\Data\Grad\test_Work_Data.csv')
 WD = WD.set_index(WD.columns[0])
 WD.index = pd.to_datetime(WD.index)
 
-X_col = list(WD.columns)
-X_col.remove('global crisis') # X use all of the columns from the WD minus 'global crisis'column which is y
+Indep_var = pd.read_csv(r'D:\Data\Grad\X_filtered.csv')
+Indep_var = Indep_var.set_index(Indep_var.columns[0])
+Indep_var.index = pd.to_datetime(Indep_var.index)
 
 y = WD['global crisis']
-X = WD[[i for i in X_col]]
+X = WD[Indep_var.columns]
 
 # Create trainig set, testing set.
 X_train, X_test,y_train, y_test = train_test_split(X, y,
@@ -39,28 +40,24 @@ X_test_s = pd.concat([date_t, X_test_s], axis = 1) # X_train scaled and ready to
 X_train_s = X_train_s.set_index('Unnamed: 0')
 X_test_s = X_test_s.set_index('Unnamed: 0') # X_test scaled and ready to go
 
-# Filtered Data with Boruta
-X_fil_train = pd.read_csv(r"D:\Data\Grad\X_filtered.csv")
-X_fil_train = X_fil_train.set_index(X_fil_train.columns[0])
-
 # logistic regression
 from sklearn.linear_model import LogisticRegression
-logR_clf = LogisticRegression().fit(X_fil_train, y_train)
-y_pred_logR = logR_clf.predict(X_test_s[X_fil_train.columns])
+logR_clf = LogisticRegression().fit(X_train_s, y_train)
+y_pred_logR = logR_clf.predict(X_test_s[X_train_s.columns])
 acc = metrics.accuracy_score(y_test, y_pred_logR)
 print('logistic_regression', acc)
 # Random Forest
 from sklearn.ensemble import RandomForestClassifier
 rf_clf = RandomForestClassifier(n_estimators = 100)
-rf_clf.fit(X_fil_train, y_train)
-y_pred_rf = rf_clf.predict((X_test_s[X_fil_train.columns]))
+rf_clf.fit(X_train_s, y_train)
+y_pred_rf = rf_clf.predict((X_test_s[X_train_s.columns]))
 acc2 = metrics.accuracy_score(y_test, y_pred_rf)
 print('Random forest', acc2)
 # support vector machine
 from sklearn import svm
 svm_clf = svm.SVC()
-svm_clf.fit(X_fil_train, y_train)
-y_pred_svm = svm_clf.predict((X_test_s[X_fil_train.columns]))
+svm_clf.fit(X_train_s, y_train)
+y_pred_svm = svm_clf.predict((X_test_s[X_train_s.columns]))
 sv = svm_clf.support_vectors_
 acc3 = metrics.accuracy_score(y_test, y_pred_svm)
 print('Support Vector machine', acc3)

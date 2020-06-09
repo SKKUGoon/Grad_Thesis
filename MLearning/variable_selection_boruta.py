@@ -19,6 +19,7 @@ X_col.remove('global crisis') # X use all of the columns from the WD minus 'glob
 
 y = WD['global crisis']
 X = WD[[i for i in X_col]]
+X = X.drop(['ame_crisis', 'eu_crisis', 'asia_crisis'], axis = 1)
 
 # Create trainig set, testing set.
 X_train, X_test,y_train, y_test = train_test_split(X, y,
