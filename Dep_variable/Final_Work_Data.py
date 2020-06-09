@@ -93,6 +93,6 @@ t_end_date = datetime.date(2020, 5, 15)
 
 t_Work_Data = Work_Data[t_starting_date : t_ending_date]
 t_Work_Data.index = pd.to_datetime(t_Work_Data.index)
-t_Work_Data = t_Work_Data.interpolate(method = 'time')
+
 t_Work_Data.to_csv(r'D:\Data\Grad\test_Work_Data.csv', index = True)
 print(t_Work_Data)
