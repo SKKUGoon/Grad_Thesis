@@ -3,11 +3,15 @@ import timeit
 
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
-from sklearn import metrics
 
+from MLearning.ScoringMethods import scoring_model
+
+import random
 import warnings
 warnings.filterwarnings(action = "ignore", category = FutureWarning)
 
+# Set Seed
+random.seed(41)
 
 # Data_using
 start = timeit.default_timer()
@@ -48,14 +52,29 @@ X_test_s = X_test_s.set_index('Unnamed: 0') # X_test scaled and ready to go
 from sklearn.linear_model import LogisticRegression
 logR_clf = LogisticRegression().fit(X_train_s, y_train)
 y_pred_logR = logR_clf.predict(X_test_s[X_train_s.columns])
-acc = metrics.accuracy_score(y_test, y_pred_logR)
-print('logistic_regression', acc)
+acc_logR = scoring_model(y_test, y_pred_logR)
+print(acc_logR.sensitivity(), acc_logR.specificity())
+acc1 = {'gmean' : acc_logR.gmean(),
+        'LP' : acc_logR.LP(),
+        'LR' : acc_logR.LR(),
+        'DP' : acc_logR.DP(),
+        'Youden' : acc_logR.Youden(),
+        'BA' : acc_logR.BA()}
+print('logistic_regression', acc1)
 # Random Forest
 from sklearn.ensemble import RandomForestClassifier
 rf_clf = RandomForestClassifier(n_estimators = 100)
 rf_clf.fit(X_train_s, y_train)
 y_pred_rf = rf_clf.predict((X_test_s[X_train_s.columns]))
-acc2 = metrics.accuracy_score(y_test, y_pred_rf)
+acc_rf = scoring_model(y_test, y_pred_rf)
+
+print(acc_rf.sensitivity(), acc_rf.specificity())
+acc2 = {'gmean' : acc_rf.gmean(),
+        'LP' : acc_rf.LP(),
+        'LR' : acc_rf.LR(),
+        'DP' : acc_rf.DP(),
+        'Youden' : acc_rf.Youden(),
+        'BA' : acc_rf.BA()}
 print('Random forest', acc2)
 # support vector machine
 from sklearn import svm
@@ -63,7 +82,14 @@ svm_clf = svm.SVC()
 svm_clf.fit(X_train_s, y_train)
 y_pred_svm = svm_clf.predict((X_test_s[X_train_s.columns]))
 sv = svm_clf.support_vectors_
-acc3 = metrics.accuracy_score(y_test, y_pred_svm)
+acc_svm = scoring_model(y_test, y_pred_svm)
+print(acc_svm.sensitivity(), acc_svm.specificity())
+acc3 = {'gmean' : acc_svm.gmean(),
+        'LP' : acc_svm.LP(),
+        'LR' : acc_svm.LR(),
+        'DP' : acc_svm.DP(),
+        'Youden' : acc_svm.Youden(),
+        'BA' : acc_svm.BA()}
 print('Support Vector machine', acc3)
 # Neural Networks
 
