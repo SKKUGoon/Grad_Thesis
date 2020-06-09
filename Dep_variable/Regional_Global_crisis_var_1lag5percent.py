@@ -56,12 +56,12 @@ eu_crisis_df.index = countries_eu_dat.index
 asia_crisis_df = pd.DataFrame(asia_crisis, columns = ['asia_crisis'])
 asia_crisis_df.index = countries_asia_dat.index
 region_crisis = pd.concat([ame_crisis_df, eu_crisis_df, asia_crisis_df], axis = 1)
-region_crisis = region_crisis.fillna(0)
+region_crisis = region_crisis.fillna(method = 'ffill')
 
 # Global Crisis 1% 20lag
 glb_crisis = []
 for j in range(len(region_crisis)):
-    if region_crisis.sum(axis = 1)[j] > 2:
+    if region_crisis.sum(axis = 1)[j] >= 2:
         glb_crisis.append(1)
     else:
         glb_crisis.append(0)
