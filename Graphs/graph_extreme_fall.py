@@ -17,7 +17,7 @@ countries_asia_dat = pd.read_csv(r"D:\Data\Grad\asia_total_dataset.csv")
 countries_asia_dat = countries_asia_dat.set_index(countries_asia_dat.columns[0])
 
 # Lag20
-CrisisData_20lag = pd.read_csv(r"D:\Data\Grad\20lag_crisis_5p.csv", index_col = 0) # lag 1
+CrisisData_20lag = pd.read_csv(r"D:\Data\Grad\20lag_crisis_10p.csv", index_col = 0) # lag 1
 print(CrisisData_20lag)
 
 for_graph_temp = CrisisData_20lag[1502:6809]
@@ -33,7 +33,7 @@ Data5.index = pd.to_datetime(Data5.index)
 Data5 = Data5.replace(0, np.nan)
 Data5 = Data5.interpolate(method = 'time')
 
-CrisisData_20lag2 = pd.read_csv(r"D:\Data\Grad\20global_regional5p.csv")
+CrisisData_20lag2 = pd.read_csv(r"D:\Data\Grad\20global_regional10p.csv")
 us_stock = Data5['US'][t_starting_date : t_ending_date]
 us = pd.DataFrame(for_graph_temp['US'])
 plt.plot(us_stock, 'r')
@@ -45,4 +45,4 @@ plt.show()
 Cris = CrisisData_20lag.sum(axis = 1)
 for_graph2 = pd.DataFrame(Cris[1502:6809])
 Cris = pd.DataFrame(Cris)
-plt.plot(Cris.index, Cris[Cris.columns[0]])
+Cris.to_csv(r'D:\Data\Grad\Crisis_for_countries.csv')
