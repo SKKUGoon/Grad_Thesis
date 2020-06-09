@@ -63,7 +63,7 @@ acc1 = {'gmean' : acc_logR.gmean(),
 print('logistic_regression', acc1)
 # Random Forest
 from sklearn.ensemble import RandomForestClassifier
-rf_clf = RandomForestClassifier(n_estimators = 100)
+rf_clf = RandomForestClassifier(n_estimators = 100, max_depth = 15)
 rf_clf.fit(X_train_s, y_train)
 y_pred_rf = rf_clf.predict((X_test_s[X_train_s.columns]))
 acc_rf = scoring_model(y_test, y_pred_rf)
@@ -91,17 +91,23 @@ acc3 = {'gmean' : acc_svm.gmean(),
         'Youden' : acc_svm.Youden(),
         'BA' : acc_svm.BA()}
 print('Support Vector machine', acc3)
-# Neural Networks
 
 # CART
-from sklearn.model_selection import cross_val_score
-#from sklearn.model_selection import KFold
-#from sklearn import tree
-#cv = KFold(n = X_fil_train.shape[0], n_folds = 5, shuffle = True, random_state = 1)
-#for i in range(1,10):
-#    tree_clf = tree.DecisionTreeClassifier(max_depth = i, random_state = 0)
-#    if tree_clf.fit(X_fil_train, y_train).tree_
-from sklearn import tree
+from sklearn.tree import DecisionTreeClassifier
+CART_clf = DecisionTreeClassifier(max_depth = 15) # deal with max_depth later
+CART_clf.fit(X_train_s, y_train)
+y_pred_CART = CART_clf.predict(X_test_s)
+acc_CART = scoring_model(y_test, y_pred_CART)
+acc4 = {'gmean' : acc_CART.gmean(),
+        'LP' : acc_CART.LP(),
+        'LR' : acc_CART.LR(),
+        'DP' : acc_CART.DP(),
+        'Youden' : acc_CART.Youden(),
+        'BA' : acc_CART.BA()}
+print(acc_CART.sensitivity(), acc_CART.specificity())
+print('Classification and Regression Tree', acc4)
+
+# Neural Networks
 
 
 # XGBoost - Later
