@@ -11,10 +11,13 @@ import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 
 start = timeit.default_timer()
-
 WD = pd.read_csv(r'D:\Data\Grad\test_Work_Data.csv')
 WD = WD.set_index(WD.columns[0])
 WD.index = pd.to_datetime(WD.index)
+
+WD1 = WD[WD.columns[0:4]].fillna(method = 'ffill')
+WD2 = WD[WD.columns[4:1078]].interpolate(method = 'time')
+WD = pd.concat([WD1, WD2], axis = 1)
 
 X_col = list(WD.columns)
 X_col.remove('global crisis') # X use all of the columns from the WD minus 'global crisis'column which is y
