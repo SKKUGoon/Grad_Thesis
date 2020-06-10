@@ -103,7 +103,7 @@ acc3 = {'gmean' : acc_svm.gmean(),
 print('Support Vector machine', acc3)
 
 # CART
-CART_clf = DecisionTreeClassifier(max_depth = 15) # deal with max_depth later
+CART_clf = DecisionTreeClassifier(max_depth = 15, random_state = 42) # deal with max_depth later
 CART_clf.fit(X_train_s, y_train)
 y_pred_CART = CART_clf.predict(X_test_s)
 acc_CART = scoring_model(y_test, y_pred_CART)
