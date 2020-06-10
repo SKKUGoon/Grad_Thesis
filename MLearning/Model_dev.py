@@ -1,7 +1,10 @@
 import numpy as np
 import pandas as pd
 import timeit
+import matplotlib.pyplot as plt
 
+from sklearn.metrics import roc_curve
+from sklearn.metrics import auc
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
@@ -113,6 +116,22 @@ acc4 = {'gmean' : acc_CART.gmean(),
 print(acc_CART.sensitivity(), acc_CART.specificity())
 print('Classification and Regression Tree', acc4)
 
+# XGBoost - Later
+
+# Deep Feed Forward Network(MXNET)
+import tensorflow as tf
+# Original Data
+scale = StandardScaler() # Scale the data.
+scale.fit(X_train)
+X_train_s = pd.DataFrame(scale.transform(X_train), columns = list(X_train.columns))
+X_test_s = pd.DataFrame(scale.transform(X_test), columns = list(X_test.columns))
+date = pd.DataFrame(X_train.index)
+date_t = pd.DataFrame(X_test.index)
+X_train_s = pd.concat([date, X_train_s], axis = 1)
+X_test_s = pd.concat([date_t, X_test_s], axis = 1) # X_train scaled and ready to go
+X_train_s = X_train_s.set_index('Unnamed: 0')
+X_test_s = X_test_s.set_index('Unnamed: 0') # X_test scaled and ready to go
+
 # Neural Networks
 model = Sequential()
 model.add(Dense(units = 50, input_dim = len(X_train_s.columns), activation = 'relu'))
@@ -125,8 +144,8 @@ acc_NN_dict = {'gmean' : [],
                'DP' : [],
                'Youden' : [],
                'BA' : []} # store 20 iterations result
-for iter_ in range(0,20):
-        random.seed(iter_)
+for iter_ in range(0,2):
+        np.random.seed(iter_)
         result1 = model.fit(X_train_s, y_train, verbose = 0)
         y_pred_NN_temp = model.predict(X_test_s)
         y_pred_NN = []
@@ -156,8 +175,45 @@ acc5 = {'gmean' : np.mean(acc_NN_dict['gmean']),
         'BA' : np.mean(acc_NN_dict['BA'])}
 print('Neural Net', acc5)
 
+# ROC Curve
 
-# XGBoost - Later
+# Logistic Regression
+logR_proba = []
+pr = logR_clf.predict_proba(X_test_s)
+for i in range(len(X_test_s)):
+    logR_proba.append(pr[i][1])
+fpr_NN, tpr_NN, thresholds_NN = roc_curve(y_test, logR_proba)
+AUC_logR = auc(fpr_NN, tpr_NN)
+plt.plot([0, 1], [0, 1], 'k--')
+plt.plot(fpr_NN, tpr_NN, label='LogR (area = {:.3f})'.format(AUC_logR))
 
-# Deep Feed Forward Network(MXNET)
-import tensorflow as tf
+# Random Forest
+rf_proba = []
+pr = rf_clf.predict_proba(X_test_s)
+for i in range(len(X_test_s)):
+    rf_proba.append(pr[i][1])
+fpr_rf, tpr_rf, thresholds_rf = roc_curve(y_test, rf_proba)
+AUC_RF = auc(fpr_rf, tpr_rf)
+plt.plot([0, 1], [0, 1], 'k--')
+plt.plot(fpr_rf, tpr_rf, label='RF (area = {:.3f})'.format(AUC_RF))
+
+# Support Vector Machine
+#fpr_NN, tpr_NN, thresholds_NN = roc_curve(y_test, y_pred_NN_temp.ravel())
+#auc_keras = auc(fpr_NN, tpr_NN)
+#plt.plot([0, 1], [0, 1], 'k--')
+#plt.plot(fpr_NN, tpr_NN, label='SVM (area = {:.3f})'.format(auc_keras))
+
+# Neural Net
+fpr_NN, tpr_NN, thresholds_NN = roc_curve(y_test, y_pred_NN_temp.ravel())
+AUC_NN = auc(fpr_NN, tpr_NN)
+plt.plot([0, 1], [0, 1], 'k--')
+plt.plot(fpr_NN, tpr_NN, label='Neural Net (area = {:.3f})'.format(AUC_NN))
+
+
+plt.xlabel('False positive rate')
+plt.ylabel('True positive rate')
+plt.title('ROC curve')
+
+plt.legend(loc='best')
+
+plt.show()
