@@ -15,6 +15,7 @@ from MLearning.ScoringMethods import scoring_model
 from keras.utils import np_utils
 from keras.models import Sequential, load_model
 from keras.layers import Dense, Activation, Dropout
+import tensorflow as tf
 
 import random
 import warnings
@@ -73,7 +74,7 @@ acc1 = {'gmean' : acc_logR.gmean(),
 print('logistic_regression', acc1)
 
 # Random Forest
-rf_clf = RandomForestClassifier(n_estimators = 100, max_depth = 15)
+rf_clf = RandomForestClassifier(n_estimators = 100, max_depth = 15, random_state = 55)
 rf_clf.fit(X_train_s, y_train)
 y_pred_rf = rf_clf.predict((X_test_s[X_train_s.columns]))
 acc_rf = scoring_model(y_test, y_pred_rf)
@@ -133,38 +134,39 @@ X_train_s = X_train_s.set_index('Unnamed: 0')
 X_test_s = X_test_s.set_index('Unnamed: 0') # X_test scaled and ready to go
 
 # Neural Networks
-model = Sequential()
-model.add(Dense(units = 50, input_dim = len(X_train_s.columns), activation = 'relu'))
-model.add(Dense(units = 1, activation = 'sigmoid'))
-model.compile(loss = 'binary_crossentropy', optimizer = 'sgd')
-
 acc_NN_dict = {'gmean' : [],
                'LP' : [],
                'LR' : [],
                'DP' : [],
                'Youden' : [],
                'BA' : []} # store 20 iterations result
-for iter_ in range(0,2):
-        np.random.seed(iter_)
-        result1 = model.fit(X_train_s, y_train, verbose = 0)
-        y_pred_NN_temp = model.predict(X_test_s)
-        y_pred_NN = []
-        for i in range(len(y_pred_NN_temp)):
-            if y_pred_NN_temp[i] >= 0.5:
-                y_pred_NN.append(1)
-            else:
-                y_pred_NN.append(0)
-        acc_NN = scoring_model(y_test, y_pred_NN)
+for iter_ in [39]:
+    np.random.seed(iter_)
+    random.seed(iter_)
+    tf.random.set_seed(iter_)
+    model = Sequential()
+    model.add(Dense(units = 50, input_dim = len(X_train_s.columns), activation = 'relu'))
+    model.add(Dense(units = 1, activation = 'sigmoid'))
+    model.compile(loss = 'binary_crossentropy', optimizer = 'sgd')
+    result1 = model.fit(X_train_s, y_train, verbose = 0)
+    y_pred_NN_temp = model.predict(X_test_s)
+    y_pred_NN = []
+    for i in range(len(y_pred_NN_temp)):
+        if y_pred_NN_temp[i] >= 0.5:
+            y_pred_NN.append(1)
+        else:
+            y_pred_NN.append(0)
+    acc_NN = scoring_model(y_test, y_pred_NN)
 
-        # add metrics
-        acc_NN_dict['gmean'].append(acc_NN.gmean())
-        acc_NN_dict['LP'].append(acc_NN.LP())
-        acc_NN_dict['LR'].append(acc_NN.LR())
-        acc_NN_dict['DP'].append(acc_NN.DP())
-        acc_NN_dict['Youden'].append(acc_NN.Youden())
-        acc_NN_dict['BA'].append(acc_NN.BA())
-        # print out phase number 1 ~ 20
-        print('NN iteration phase', (iter_ + 0))
+    # add metrics
+    acc_NN_dict['gmean'].append(acc_NN.gmean())
+    acc_NN_dict['LP'].append(acc_NN.LP())
+    acc_NN_dict['LR'].append(acc_NN.LR())
+    acc_NN_dict['DP'].append(acc_NN.DP())
+    acc_NN_dict['Youden'].append(acc_NN.Youden())
+    acc_NN_dict['BA'].append(acc_NN.BA())
+    # print out phase number 1 ~ 20
+    print('NN iteration phase', (iter_ + 0))
 
 dictkey = list(acc_NN_dict.keys())
 acc5 = {'gmean' : np.mean(acc_NN_dict['gmean']),
@@ -198,10 +200,10 @@ plt.plot([0, 1], [0, 1], 'k--')
 plt.plot(fpr_rf, tpr_rf, label='RF (area = {:.3f})'.format(AUC_RF))
 
 # Support Vector Machine
-#fpr_NN, tpr_NN, thresholds_NN = roc_curve(y_test, y_pred_NN_temp.ravel())
-#auc_keras = auc(fpr_NN, tpr_NN)
+#fpr_svm, tpr_svm, thresholds_svm = roc_curve(y_test, y_pred_svm)
+#auc_svm = auc(fpr_svm, tpr_svm)
 #plt.plot([0, 1], [0, 1], 'k--')
-#plt.plot(fpr_NN, tpr_NN, label='SVM (area = {:.3f})'.format(auc_keras))
+#plt.plot(fpr_svm, tpr_svm, label='SVM (area = {:.3f})'.format(auc_svm))
 
 # Neural Net
 fpr_NN, tpr_NN, thresholds_NN = roc_curve(y_test, y_pred_NN_temp.ravel())
@@ -217,3 +219,14 @@ plt.title('ROC curve')
 plt.legend(loc='best')
 
 plt.show()
+
+# Save Prediction Data
+logR_df = pd.DataFrame(y_pred_logR, columns = ['logR'])
+RF_df = pd.DataFrame(y_pred_rf, columns = ['RF'])
+SVM_df = pd.DataFrame(y_pred_svm, columns = ['SVM'])
+CART_df = pd.DataFrame(y_pred_CART, columns = ['CART'])
+NN_df = pd.DataFrame(y_pred_NN, columns = ['NN'])
+real = pd.DataFrame(list(y_test), columns = ['global crisis'])
+Ttl = pd.concat([logR_df, RF_df, SVM_df, CART_df, NN_df, real], axis = 1)
+Ttl.index = y_test.index
+Ttl.to_csv(r'D:\Data\Grad\y_pred_all.csv')

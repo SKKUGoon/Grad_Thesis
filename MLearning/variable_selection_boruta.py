@@ -42,7 +42,7 @@ X_test_b = X_test.to_numpy()
 y_test_b = y_test.to_numpy()
 
 # define Random Forest
-rf = RandomForestClassifier(n_jobs = -1, class_weight = 'balanced', max_depth = 5)
+rf = RandomForestClassifier(n_jobs = -1, class_weight = 'balanced', max_depth = int(np.sqrt(len(X_train_s.columns))))
 feature_select = BorutaPy(rf, n_estimators= 'auto', verbose = 2, random_state= 1)
 feature_select.fit(X_train_b, y_train_b)
 selected_var = feature_select.support_
