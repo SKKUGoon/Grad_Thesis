@@ -19,6 +19,12 @@ Data4 = pd.read_csv(r"D:\Data\Grad\1lag_crisis.csv") # Stock Crisis 1lag
 Data4 = Data4.set_index(Data4.columns[0])
 Data4.index = pd.to_datetime(Data4.index)
 
+Data6 = pd.read_csv(r"D:\Data\Grad\bonds_dataset.csv") # Raw bond data
+Data6 = Data6.set_index(Data6.columns[0])
+Data6.index = pd.to_datetime(Data6.index)
+Data6 = Data6.interpolate(method = 'time')
+Data6 = Data6.fillna(0)
+
 Data5 = pd.read_csv(r"D:\Data\Grad\total_stock_index_dataset.csv") # Raw stock data (not return)
 Data5 = Data5.set_index(Data5.columns[0])
 Data5.index = pd.to_datetime(Data5.index)
@@ -53,8 +59,8 @@ volatility_Data5 = volatility_Data5.rename(columns = col_ln_volatility)
 
 # Create Lag
 lag_value = [1, 2, 3, 4, 5, 20, 30, 60, 90] # 1day, 2day, 3day, ... , 3 months
-lagging_data = [Data2, Data3, Data5, lnData5] # lagging only exchange_rate, raw stock data, and additional data
-lagged_data_key = ['Data2', 'Data3', 'Data5', 'lnData5']
+lagging_data = [Data2, Data3, Data5, lnData5, Data6] # lagging only exchange_rate, raw stock data, and additional data
+lagged_data_key = ['Data2', 'Data3', 'Data5', 'lnData5', 'Data6']
 lagged_data = {}
 for lag in lag_value:
     for d in range(len(lagging_data)):
@@ -81,10 +87,15 @@ Work_Data = pd.concat([Data1,
                        Data3[starting_date : ending_date],
                        Data5[starting_date : ending_date],
                        lnData5[starting_date : ending_date],
+                       Data6[starting_date : ending_date],
                        ln_return_Data5[starting_date : ending_date],
                        volatility_Data5[starting_date : ending_date],
                        lag_temp[starting_date : ending_date]], axis = 1)
-
+Work_Data_without_lag = pd.concat([Data1,
+                                   Data2[starting_date : ending_date],
+                                   Data3[starting_date : ending_date],
+                                   Data5[starting_date : ending_date],
+                                   Data6[starting_date : ending_date]], axis = 1)
 # Testing. Use Full Data Next Time
 t_starting_date = '2001-12-06'
 t_start_date = datetime.date(2001, 12, 6)
@@ -94,5 +105,10 @@ t_end_date = datetime.date(2020, 5, 15)
 t_Work_Data = Work_Data[t_starting_date : t_ending_date]
 t_Work_Data.index = pd.to_datetime(t_Work_Data.index)
 
+t_Work_Data_without_lag = Work_Data_without_lag[t_starting_date : t_ending_date]
+t_Work_Data_without_lag.index = pd.to_datetime(t_Work_Data_without_lag.index)
+
 t_Work_Data.to_csv(r'D:\Data\Grad\test_Work_Data.csv', index = True)
+t_Work_Data_without_lag.to_csv(r'D:\Data\Grad\test_Work_Data_wo_lag.csv', index = True)
 print(t_Work_Data)
+print(t_Work_Data_without_lag)
