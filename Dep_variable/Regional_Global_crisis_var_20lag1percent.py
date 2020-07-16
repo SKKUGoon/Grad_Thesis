@@ -1,6 +1,6 @@
 import pandas as pd
 import datetime
-
+"""Deprecated 2020-07-17"""
 t_starting_date = '2001-12-06'
 t_start_date = datetime.date(2001, 12, 6)
 t_ending_date = '2020-05-15'
