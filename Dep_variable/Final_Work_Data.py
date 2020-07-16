@@ -38,6 +38,11 @@ for i in range(len(lnData5.columns)):
 lnData5 = lnData5.rename(columns = col_lnData5)
 d5 = preprocessing(lnData5)
 
+Data_kor = pd.read_csv(r"D:\Data\Grad\Kor_log_ret_class_lag1.csv") # Korea classified Data
+Data_kor = Data_kor.set_index(Data_kor.columns[0])
+Data_kor.index = pd.to_datetime(Data_kor.index)
+Data_kor = Data_kor.replace(0, np.nan)
+Data_kor = Data_kor.fillna(-1)
 # Take Log
 log_return_stock = {} # Null Dict to contain log returns
 log_return_sqr_stock = {}
@@ -91,8 +96,7 @@ Work_Data = pd.concat([Data1,
                        ln_return_Data5[starting_date : ending_date],
                        volatility_Data5[starting_date : ending_date],
                        lag_temp[starting_date : ending_date]], axis = 1)
-Work_Data_without_lag = pd.concat([Data1,
-                                   Data2[starting_date : ending_date],
+Work_Data_without_lag = pd.concat([Data2[starting_date : ending_date],
                                    Data3[starting_date : ending_date],
                                    Data5[starting_date : ending_date],
                                    Data6[starting_date : ending_date]], axis = 1)
@@ -104,11 +108,14 @@ t_end_date = datetime.date(2020, 5, 15)
 
 t_Work_Data = Work_Data[t_starting_date : t_ending_date]
 t_Work_Data.index = pd.to_datetime(t_Work_Data.index)
-
+t_Work_Data.to_csv(r'D:\Data\Grad\test_Work_Data.csv', index = True) # save as csv
+# This is the data without lag - From now use this. 2020-07-17
 t_Work_Data_without_lag = Work_Data_without_lag[t_starting_date : t_ending_date]
 t_Work_Data_without_lag.index = pd.to_datetime(t_Work_Data_without_lag.index)
 
-t_Work_Data.to_csv(r'D:\Data\Grad\test_Work_Data.csv', index = True)
-t_Work_Data_without_lag.to_csv(r'D:\Data\Grad\test_Work_Data_wo_lag.csv', index = True)
-print(t_Work_Data)
-print(t_Work_Data_without_lag)
+t_Work_Data_without_lag = t_Work_Data_without_lag.interpolate(method = 'time')
+
+Data_kor = Data_kor[t_starting_date : t_ending_date]
+t_Work_Data_without_lag = pd.concat([Data_kor, t_Work_Data_without_lag], axis = 1)
+t_Work_Data_without_lag = t_Work_Data_without_lag.fillna(method = 'ffill') # Use the value before the NaN to fill it.
+t_Work_Data_without_lag.to_csv(r'D:\Data\Grad\test_Work_Data_wo_lag.csv', index = True) # save as csv
