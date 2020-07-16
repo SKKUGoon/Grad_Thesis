@@ -8,6 +8,7 @@ class preprocessing:
         self.data = data
         self.df_columns = data.columns # List of columns name
 
+
     def empirical_dist(self, lag_distance, column_number):
         self.lag = lag_distance # exogenous
         self.col_num = column_number # exogenous
@@ -15,6 +16,40 @@ class preprocessing:
         self.yield_dist = self.play - self.play.shift(self.lag) # Lagging process
         print('Deprecated. When you calculate yield_dist, Use crisis_code_200 instead')
         return self.yield_dist
+
+
+    def log_return(self, lag_distance, column_number):
+        self.lag = lag_distance
+        self.col_num = column_number
+        self.play = self.data[list(self.df_columns)[self.col_num]]
+
+        self.logreturn = np.log(self.play) - np.log(self.play.shift(self.lag))
+        self.result = pd.DataFrame(self.logreturn, columns = [self.df_columns[self.col_num]])
+        return self.result
+
+
+    def log_return_class(self, column_number, simplicity = '2 class'):
+        self.sim = simplicity
+        self.col_num = column_number
+        self.index = self.data.index
+        self.play = self.data[list(self.df_columns)[self.col_num]]
+        if self.sim == '2 class':
+            self.playlist = list(self.play)
+            self.resultlist = list()
+            for i in range(len(self.playlist)):
+                if self.playlist[i] < 0:
+                    self.resultlist.append(-1) # return -1 if negative
+                elif self.playlist[i] >= 0:
+                    self.resultlist.append(1)
+                else:
+                    self.resultlist.append(np.nan)
+        elif self.sim == 'n class': # Make more differentiated class
+            ...
+        else: # Make another classification standards
+            ...
+        # As DataFrame
+        self.lrc = pd.DataFrame(data = self.resultlist, index = list(self.index), columns = [self.df_columns[self.col_num] + ' class'])
+        return self.lrc
 
     def crisis_code_200(self, column_number, lag_distance, quantile_exo):
         self.col_num = column_number # Data's column
@@ -48,6 +83,7 @@ class preprocessing:
     def empirical_dist_graph(self, data):
         return None
 
+
     def crisis_coding(self, quantile, column_number):
         self.col_num = column_number # exogenous
         self.workspace = self.data[list(self.data.columns)[self.col_num]] # define workspace as particular column of the data
@@ -61,3 +97,4 @@ class preprocessing:
                 self.crisis_coded.append(0)
         print('Deprecated. Use crisis_code_200 instead') # No longer useful
         return pd.DataFrame(self.crisis_coded) # Report as DataFrame
+
