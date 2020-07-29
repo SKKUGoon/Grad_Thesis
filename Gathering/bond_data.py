@@ -42,4 +42,4 @@ for i in range(len(investpy_tickers) - 1):
     bonds_dataset = pd.concat([bonds_dataset, bonds_close[i+1]], axis = 1)
 
 bonds_dataset.to_csv(r"D:\Data\Grad\bonds_dataset.csv")
-# NO BOND DATA!
+
