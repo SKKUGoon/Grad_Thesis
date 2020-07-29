@@ -38,11 +38,34 @@ for i in range(len(lnData5.columns)):
 lnData5 = lnData5.rename(columns = col_lnData5)
 d5 = preprocessing(lnData5)
 
+# Korea Classification Datas
 Data_kor = pd.read_csv(r"D:\Data\Grad\Kor_log_ret_class_lag1.csv") # Korea classified Data
 Data_kor = Data_kor.set_index(Data_kor.columns[0])
 Data_kor.index = pd.to_datetime(Data_kor.index)
 Data_kor = Data_kor.replace(0, np.nan)
 Data_kor = Data_kor.fillna(-1)
+
+def refurbish_dataframe(DataFrame_, nan_option='Discrete', lag_option=0) -> pd.DataFrame: # from now on use this
+    DataFrame_ = DataFrame_.set_index(DataFrame_.columns[0])
+    DataFrame_.index = pd.to_datetime(DataFrame_.index)
+
+    if nan_option == 'Discrete':
+        DataFrame_ = DataFrame_.replace(0, np.nan)
+        DataFrame_ = DataFrame_.fillna(-1)
+    else: # Continuous Data
+        DataFrame_ = DataFrame_.interpolate(method='time')
+
+    DataFrame_ = DataFrame_.shift(lag_option)
+    return DataFrame_
+
+# 3 days return result "UNTIL YESTERDAY"
+Data_kor_3days_return = pd.read_csv(r"D:\Data\Grad\Kor_log_ret_class_lag3.csv") # Korea 3 days Data
+Data_kor_3days_return = refurbish_dataframe(Data_kor_3days_return, lag_option=1)
+
+# KOSPI Trade Volume 'UNTIL YESTERDAY'
+Data_Volume = pd.read_csv(r'D:\Data\Grad\Kospi_volume.csv')
+Data_volume = refurbish_dataframe(Data_Volume, nan_option='Continuous', lag_option=1)
+
 # Take Log
 log_return_stock = {} # Null Dict to contain log returns
 log_return_sqr_stock = {}
@@ -96,26 +119,54 @@ Work_Data = pd.concat([Data1,
                        ln_return_Data5[starting_date : ending_date],
                        volatility_Data5[starting_date : ending_date],
                        lag_temp[starting_date : ending_date]], axis = 1)
+
 Work_Data_without_lag = pd.concat([Data2[starting_date : ending_date],
                                    Data3[starting_date : ending_date],
                                    Data5[starting_date : ending_date],
-                                   Data6[starting_date : ending_date]], axis = 1)
+                                   Data6[starting_date : ending_date],
+                                   Data_volume[starting_date : ending_date]], axis = 1)
+
+Work_Data_with_lag = pd.concat([Data2[starting_date : ending_date],
+                                Data3[starting_date : ending_date],
+                                Data5[starting_date : ending_date],
+                                Data6[starting_date : ending_date],
+                                ln_return_Data5[starting_date: ending_date],
+                                volatility_Data5[starting_date: ending_date],
+                                Data_volume[starting_date : ending_date],
+                                lag_temp[starting_date : ending_date]], axis = 1)
+
+
 # Testing. Use Full Data Next Time
 t_starting_date = '2001-12-06'
 t_start_date = datetime.date(2001, 12, 6)
 t_ending_date = '2020-05-15'
 t_end_date = datetime.date(2020, 5, 15)
 
-t_Work_Data = Work_Data[t_starting_date : t_ending_date]
-t_Work_Data.index = pd.to_datetime(t_Work_Data.index)
-t_Work_Data.to_csv(r'D:\Data\Grad\test_Work_Data.csv', index = True) # save as csv
-# This is the data without lag - From now use this. 2020-07-17
+# This is the data without lag - From now use this. 2020-07-17 Original Data
 t_Work_Data_without_lag = Work_Data_without_lag[t_starting_date : t_ending_date]
 t_Work_Data_without_lag.index = pd.to_datetime(t_Work_Data_without_lag.index)
-
 t_Work_Data_without_lag = t_Work_Data_without_lag.interpolate(method = 'time')
 
+# Data_kor and Data_kor_3days is separated because they are discrete values
 Data_kor = Data_kor[t_starting_date : t_ending_date]
-t_Work_Data_without_lag = pd.concat([Data_kor, t_Work_Data_without_lag], axis = 1)
+Data_kor_3days_return = Data_kor_3days_return[starting_date : ending_date]
+
+t_Work_Data_without_lag = pd.concat([Data_kor, Data_kor_3days_return, t_Work_Data_without_lag], axis = 1)
 t_Work_Data_without_lag = t_Work_Data_without_lag.fillna(method = 'ffill') # Use the value before the NaN to fill it.
 t_Work_Data_without_lag.to_csv(r'D:\Data\Grad\test_Work_Data_wo_lag.csv', index = True) # save as csv
+
+# Data with lag. Original Data add ln_return and volatility
+t_Work_Data_with_lag = Work_Data_with_lag[t_starting_date : t_ending_date]
+t_Work_Data_with_lag.index = pd.to_datetime(t_Work_Data_with_lag.index)
+t_Work_Data_with_lag = t_Work_Data_with_lag.interpolate(method = 'time')
+
+# Data_kor and Data_kor_3days is separated because they are discrete values
+Data_kor = Data_kor[t_starting_date : t_ending_date]
+Data_kor_3days_return = Data_kor_3days_return[t_starting_date : t_ending_date]
+
+t_Work_Data_with_lag = pd.concat([Data_kor, Data_kor_3days_return, t_Work_Data_with_lag], axis = 1)
+t_Work_Data_with_lag = t_Work_Data_with_lag.fillna(method = 'ffill') # Use the value before the NaN to fill it.
+t_Work_Data_with_lag.to_csv(r'D:\Data\Grad\test_Work_Data_w_lag.csv', index = True) # save as csv
+
+# without lag 6736 * 117  size
+# with lag 6736 * 1550  size
