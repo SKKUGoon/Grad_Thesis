@@ -16,14 +16,23 @@ what I'm about to do
 1. Develop model averaging method.
 
 Details
-- Stock market crisis defined as 5% percentile of each observed empirical distribution of return
-- Return calculated with the nation's major index(NASDAQ, KOSPI, etc)
-- Independent variables included are gathered by the 'gathering' directory
-- Calculate American Region Crisis, Asian Region Crisis, and European Region Crisis.
+- KOSPI return classification
 
-Variable Selection w/
-- LASSO
-- Boruta
+Datas - 10 groups
+1. Return for the current day and the three previous days. V
+2. Relative difference in percentage of the return V
+3. the exponential moving averages of the return 
+4. Treasury bill rates -> look it up V
+5. certificate of deposit rates V
+6. financial and economic indicators V
+7. term and default spreads V
+8. Exchange rates between the USD and 4 other currenccies V
+9. Return of Major world indices V
+10. trading volumes V
+11. return of large capitalization companies within the KOSPI 
+Feature Weighting
+-  
+
 
 Machine Learning Method model fitting.
 - model used:
