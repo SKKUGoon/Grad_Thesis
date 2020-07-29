@@ -20,7 +20,7 @@ WD = preprocessing(WorkData)
 WD = WD.log_return_class(0)
 WD.to_csv(r"D:\Data\Grad\Kor_log_ret_class_lag1.csv")
 
-# Lag : 20
+# Lag : 3
 WorkData = preprocessing(Data_kor)
 WorkData = WorkData.log_return(3, 0) # Even though the front most value is np.nan / Data will be cutted from 2001. So no worries
 WD = preprocessing(WorkData)
