@@ -8,6 +8,8 @@ from sklearn.tree import DecisionTreeClassifier
 
 from MLearning.ScoringMethods import scoring_model
 
+import matplotlib.pyplot as plt
+
 import random
 import warnings
 warnings.filterwarnings(action = "ignore", category = FutureWarning)
@@ -49,9 +51,9 @@ X_train_s = X_train_s.set_index('Unnamed: 0')
 X_test_s = X_test_s.set_index('Unnamed: 0') # X_test scaled and ready to go
 
 # Robustness Check
-robust_sens = {}
-robust_spec = {}
-gm = {}
+CART_sens = {}
+CART_spec = {}
+CART_gm = {}
 for depth in range(1, 30):
     robust_check1 = []
     robust_check2 = []
@@ -65,9 +67,24 @@ for depth in range(1, 30):
         robust_check1.append(acc_CART.sensitivity())
         robust_check2.append(acc_CART.specificity())
         robust_gmean.append(acc_CART.gmean())
-    robust_sens[f'max_depth = {depth}'] = np.mean(robust_check1)
-    robust_spec[f'max_depth = {depth}'] = np.mean(robust_check2)
-    gm[f'max_depth = {depth}'] = np.mean(robust_gmean)
+    CART_sens[f'max_depth = {depth}'] = np.mean(robust_check1)
+    CART_spec[f'max_depth = {depth}'] = np.mean(robust_check2)
+    CART_gm[f'max_depth = {depth}'] = np.mean(robust_gmean)
     print(f'max_depth {depth} checked')
 
-print(robust_sens, '\n', robust_spec, '\n', gm)
+sens = list()
+spec = list()
+gm = list()
+for i in range(len(list(CART_sens.keys()))):
+    sens.append(CART_sens[list(CART_sens.keys())[i]])
+    spec.append(CART_spec[list(CART_spec.keys())[i]])
+    gm.append(CART_gm[list(CART_gm.keys())[i]])
+x_axis = list(range(1, 30))
+
+plt.plot(x_axis, sens, color = 'r', label = 'sensitivity')
+plt.plot(x_axis, spec, color = 'b', label = 'specificity')
+plt.plot(x_axis, gm, color = 'g', label = 'gmean')
+plt.xlabel('maximum depth')
+plt.title('CART')
+plt.legend()
+plt.show()
