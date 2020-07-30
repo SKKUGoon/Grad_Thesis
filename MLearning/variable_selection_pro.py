@@ -11,7 +11,7 @@ import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 
 start = timeit.default_timer()
-WD = pd.read_csv(r'D:\Data\Grad\test_Work_Data.csv')
+WD = pd.read_csv(r'D:\Data\Grad\test_Work_Data_w_lag.csv')
 WD = WD.set_index(WD.columns[0])
 WD.index = pd.to_datetime(WD.index)
 
@@ -20,11 +20,10 @@ WD2 = WD[WD.columns[4:1078]].interpolate(method = 'time')
 WD = pd.concat([WD1, WD2], axis = 1)
 
 X_col = list(WD.columns)
-X_col.remove('global crisis') # X use all of the columns from the WD minus 'global crisis'column which is y
+X_col.remove('kor class') # X use all of the columns from the WD minus 'global crisis'column which is y
 
-y = WD['global crisis']
+y = WD['kor class']
 X = WD[[i for i in X_col]]
-X = X.drop(['ame_crisis', 'eu_crisis', 'asia_crisis'], axis = 1)
 
 # Create trainig set, testing set.
 X_train, X_test,y_train, y_test = train_test_split(X, y,
@@ -42,6 +41,8 @@ selected_var = X_train.columns[selected_var]
 print(selected_var)
 # Should include Borute algorithm - More on that later
 # https://towardsdatascience.com/boruta-explained-the-way-i-wish-someone-explained-it-to-me-4489d70e154a
-
+X_selected = list(selected_var)
+X_filtered_lasso = WD[[i for i in X_selected]]
+X_filtered_lasso.to_csv(r"D:\Data\Grad\X_filitered_lasso.csv")
 stop = timeit.default_timer()
 print('Time: ', stop - start) # time my script
