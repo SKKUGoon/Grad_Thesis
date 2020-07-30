@@ -19,7 +19,7 @@ def True_Negative(truth, pred):
     truth == 0, pred == 0"""
     TN = 0
     for elements in range(len(truth)):
-        if truth[elements] == pred[elements] and truth[elements] == 0:
+        if truth[elements] == pred[elements] and truth[elements] == -1:
             TN += 1
         else:
             pass
@@ -41,7 +41,7 @@ def False_Negative(truth, pred):
     """the number of negative cases that are miss-labeled as positive"""
     FN = 0
     for elements in range(len(truth)):
-        if truth[elements] != pred[elements] and truth[elements] == 0:
+        if truth[elements] != pred[elements] and truth[elements] == -1:
             FN += 1
         else:
             pass
