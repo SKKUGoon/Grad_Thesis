@@ -60,11 +60,11 @@ def refurbish_dataframe(DataFrame_, nan_option='Discrete', lag_option=0) -> pd.D
 
 # 3 days return result "UNTIL YESTERDAY"
 Data_kor_3days_return = pd.read_csv(r"D:\Data\Grad\Kor_log_ret_class_lag3.csv") # Korea 3 days Data
-Data_kor_3days_return = refurbish_dataframe(Data_kor_3days_return, lag_option=1)
+Data_kor_3days_return = refurbish_dataframe(Data_kor_3days_return, lag_option=0)
 
 # KOSPI Trade Volume 'UNTIL YESTERDAY'
 Data_Volume = pd.read_csv(r'D:\Data\Grad\Kospi_volume.csv')
-Data_volume = refurbish_dataframe(Data_Volume, nan_option='Continuous', lag_option=1)
+Data_volume = refurbish_dataframe(Data_Volume, nan_option='Continuous', lag_option=0)
 
 # Take Log
 log_return_stock = {} # Null Dict to contain log returns
@@ -161,7 +161,9 @@ t_Work_Data_with_lag.index = pd.to_datetime(t_Work_Data_with_lag.index)
 t_Work_Data_with_lag = t_Work_Data_with_lag.interpolate(method = 'time')
 
 # Data_kor and Data_kor_3days is separated because they are discrete values
+Data_kor = Data_kor.shift(-1) #
 Data_kor = Data_kor[t_starting_date : t_ending_date]
+Data_kor_3days_return = Data_kor_3days_return.shift(-1)
 Data_kor_3days_return = Data_kor_3days_return[t_starting_date : t_ending_date]
 
 t_Work_Data_with_lag = pd.concat([Data_kor, Data_kor_3days_return, t_Work_Data_with_lag], axis = 1)
