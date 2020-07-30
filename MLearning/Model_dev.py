@@ -27,7 +27,7 @@ random.seed(41)
 # Data_using
 start = timeit.default_timer()
 
-WD = pd.read_csv(r'D:\Data\Grad\test_Work_Data.csv')
+WD = pd.read_csv(r'D:\Data\Grad\test_Work_Data_w_lag.csv')
 WD = WD.set_index(WD.columns[0])
 WD.index = pd.to_datetime(WD.index)
 
@@ -35,11 +35,11 @@ WD1 = WD[WD.columns[0:4]].fillna(method = 'ffill')
 WD2 = WD[WD.columns[4:1078]].interpolate(method = 'time')
 WD = pd.concat([WD1, WD2], axis = 1)
 
-Indep_var = pd.read_csv(r'D:\Data\Grad\X_filtered.csv')
+Indep_var = pd.read_csv(r"D:\Data\Grad\X_filitered_lasso.csv")
 Indep_var = Indep_var.set_index(Indep_var.columns[0])
 Indep_var.index = pd.to_datetime(Indep_var.index)
 
-y = WD['global crisis']
+y = WD['kor class']
 X = WD[Indep_var.columns]
 
 # Create trainig set, testing set.
@@ -87,6 +87,7 @@ acc2 = {'gmean' : acc_rf.gmean(),
         'Youden' : acc_rf.Youden(),
         'BA' : acc_rf.BA()}
 print('Random forest', acc2)
+
 # support vector machine
 from sklearn import svm
 svm_clf = svm.SVC()
@@ -120,18 +121,7 @@ print('Classification and Regression Tree', acc4)
 # XGBoost - Later
 
 # Deep Feed Forward Network(MXNET)
-import tensorflow as tf
-# Original Data
-scale = StandardScaler() # Scale the data.
-scale.fit(X_train)
-X_train_s = pd.DataFrame(scale.transform(X_train), columns = list(X_train.columns))
-X_test_s = pd.DataFrame(scale.transform(X_test), columns = list(X_test.columns))
-date = pd.DataFrame(X_train.index)
-date_t = pd.DataFrame(X_test.index)
-X_train_s = pd.concat([date, X_train_s], axis = 1)
-X_test_s = pd.concat([date_t, X_test_s], axis = 1) # X_train scaled and ready to go
-X_train_s = X_train_s.set_index('Unnamed: 0')
-X_test_s = X_test_s.set_index('Unnamed: 0') # X_test scaled and ready to go
+# import tensorflow as tf
 
 # Neural Networks
 acc_NN_dict = {'gmean' : [],
@@ -140,22 +130,22 @@ acc_NN_dict = {'gmean' : [],
                'DP' : [],
                'Youden' : [],
                'BA' : []} # store 20 iterations result
-for iter_ in [39]:
+for iter_ in [4]:
     np.random.seed(iter_)
     random.seed(iter_)
     tf.random.set_seed(iter_)
     model = Sequential()
-    model.add(Dense(units = 50, input_dim = len(X_train_s.columns), activation = 'relu'))
-    model.add(Dense(units = 1, activation = 'sigmoid'))
+    model.add(Dense(units = 25, input_dim = len(X_train_s.columns), activation = 'relu'))
+    model.add(Dense(units = 1, activation = 'tanh'))
     model.compile(loss = 'binary_crossentropy', optimizer = 'sgd')
     result1 = model.fit(X_train_s, y_train, verbose = 0)
     y_pred_NN_temp = model.predict(X_test_s)
     y_pred_NN = []
     for i in range(len(y_pred_NN_temp)):
-        if y_pred_NN_temp[i] >= 0.5:
+        if y_pred_NN_temp[i] >= 0:
             y_pred_NN.append(1)
         else:
-            y_pred_NN.append(0)
+            y_pred_NN.append(-1)
     acc_NN = scoring_model(y_test, y_pred_NN)
 
     # add metrics
@@ -200,10 +190,10 @@ plt.plot([0, 1], [0, 1], 'k--')
 plt.plot(fpr_rf, tpr_rf, label='RF (area = {:.3f})'.format(AUC_RF))
 
 # Support Vector Machine
-#fpr_svm, tpr_svm, thresholds_svm = roc_curve(y_test, y_pred_svm)
-#auc_svm = auc(fpr_svm, tpr_svm)
-#plt.plot([0, 1], [0, 1], 'k--')
-#plt.plot(fpr_svm, tpr_svm, label='SVM (area = {:.3f})'.format(auc_svm))
+fpr_svm, tpr_svm, thresholds_svm = roc_curve(y_test, y_pred_svm)
+auc_svm = auc(fpr_svm, tpr_svm)
+plt.plot([0, 1], [0, 1], 'k--')
+plt.plot(fpr_svm, tpr_svm, label='SVM (area = {:.3f})'.format(auc_svm))
 
 # Neural Net
 fpr_NN, tpr_NN, thresholds_NN = roc_curve(y_test, y_pred_NN_temp.ravel())

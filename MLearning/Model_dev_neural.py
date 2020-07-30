@@ -26,7 +26,7 @@ random.seed(41)
 # Data_using
 start = timeit.default_timer()
 
-WD = pd.read_csv(r'D:\Data\Grad\test_Work_Data.csv')
+WD = pd.read_csv(r'D:\Data\Grad\test_Work_Data_w_lag.csv')
 WD = WD.set_index(WD.columns[0])
 WD.index = pd.to_datetime(WD.index)
 
@@ -34,11 +34,11 @@ WD1 = WD[WD.columns[0:4]].fillna(method = 'ffill')
 WD2 = WD[WD.columns[4:1078]].interpolate(method = 'time')
 WD = pd.concat([WD1, WD2], axis = 1)
 
-Indep_var = pd.read_csv(r'D:\Data\Grad\X_filtered.csv')
+Indep_var = pd.read_csv(r"D:\Data\Grad\X_filitered_lasso.csv")
 Indep_var = Indep_var.set_index(Indep_var.columns[0])
 Indep_var.index = pd.to_datetime(Indep_var.index)
 
-y = WD['global crisis']
+y = WD['kor class']
 X = WD[Indep_var.columns]
 
 # Create trainig set, testing set.
@@ -79,7 +79,7 @@ for iter_ in range(0,2):
             if y_pred_NN_temp[i] >= 0.5:
                 y_pred_NN.append(1)
             else:
-                y_pred_NN.append(0)
+                y_pred_NN.append(-1)
         acc_NN = scoring_model(y_test, y_pred_NN)
 
         # add metrics
