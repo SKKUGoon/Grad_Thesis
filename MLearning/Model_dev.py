@@ -74,7 +74,7 @@ acc1 = {'gmean' : acc_logR.gmean(),
 print('logistic_regression', acc1)
 
 # Random Forest
-rf_clf = RandomForestClassifier(n_estimators = 100, max_depth = 15, random_state = 55)
+rf_clf = RandomForestClassifier(n_estimators = 100, max_depth = 5, random_state = 42)
 rf_clf.fit(X_train_s, y_train)
 y_pred_rf = rf_clf.predict((X_test_s[X_train_s.columns]))
 acc_rf = scoring_model(y_test, y_pred_rf)
@@ -105,7 +105,7 @@ acc3 = {'gmean' : acc_svm.gmean(),
 print('Support Vector machine', acc3)
 
 # CART
-CART_clf = DecisionTreeClassifier(max_depth = 15, random_state = 41) # deal with max_depth later
+CART_clf = DecisionTreeClassifier(max_depth = 1, random_state = 42) # deal with max_depth later
 CART_clf.fit(X_train_s, y_train)
 y_pred_CART = CART_clf.predict(X_test_s)
 acc_CART = scoring_model(y_test, y_pred_CART)
@@ -130,15 +130,14 @@ acc_NN_dict = {'gmean' : [],
                'DP' : [],
                'Youden' : [],
                'BA' : []} # store 20 iterations result
-for iter_ in [4]:
-    np.random.seed(iter_)
-    random.seed(iter_)
-    tf.random.set_seed(iter_)
+for iter_ in range(10):
     model = Sequential()
-    model.add(Dense(units = 25, input_dim = len(X_train_s.columns), activation = 'relu'))
-    model.add(Dense(units = 1, activation = 'tanh'))
-    model.compile(loss = 'binary_crossentropy', optimizer = 'sgd')
-    result1 = model.fit(X_train_s, y_train, verbose = 0)
+    model.add(Dense(units=45, input_dim=len(X_train_s.columns), activation='elu'))
+    model.add(Dense(units=20, activation='relu'))
+    model.add(Dense(units=10, activation='linear'))
+    model.add(Dense(units=1, activation='tanh'))
+    model.compile(loss='binary_crossentropy', optimizer='adam')
+    result1 = model.fit(X_train_s, y_train, verbose=0)
     y_pred_NN_temp = model.predict(X_test_s)
     y_pred_NN = []
     for i in range(len(y_pred_NN_temp)):
@@ -166,6 +165,25 @@ acc5 = {'gmean' : np.mean(acc_NN_dict['gmean']),
         'Youden' : np.mean(acc_NN_dict['Youden']),
         'BA' : np.mean(acc_NN_dict['BA'])}
 print('Neural Net', acc5)
+
+# Adaboost itself
+from sklearn.ensemble import AdaBoostClassifier,VotingClassifier
+votingClf = VotingClassifier([('clf1', logR_clf), ('clf2', rf_clf),
+                              ('clf3', CART_clf)], voting='soft')
+
+adaboost = AdaBoostClassifier(base_estimator=votingClf)
+adaboost.fit(X_train_s, y_train)
+y_pred_adaboost = adaboost.predict(X_test_s)
+acc_adaboost = scoring_model(y_test, y_pred_adaboost)
+acc4 = {'gmean' : acc_adaboost.gmean(),
+        'LP' : acc_adaboost.LP(),
+        'LR' : acc_adaboost.LR(),
+        'DP' : acc_adaboost.DP(),
+        'Youden' : acc_adaboost.Youden(),
+        'BA' : acc_adaboost.BA()}
+print(acc_adaboost.sensitivity(), acc_adaboost.specificity())
+print('acc_adaboost', acc4)
+
 
 # ROC Curve
 
@@ -200,6 +218,17 @@ fpr_NN, tpr_NN, thresholds_NN = roc_curve(y_test, y_pred_NN_temp.ravel())
 AUC_NN = auc(fpr_NN, tpr_NN)
 plt.plot([0, 1], [0, 1], 'k--')
 plt.plot(fpr_NN, tpr_NN, label='Neural Net (area = {:.3f})'.format(AUC_NN))
+
+# Adaboost
+ada_proba = []
+a = adaboost.predict_proba(X_test_s)
+for i in range(len(y_test)):
+    ada_proba.append(a[i][1])
+
+fpr_ADA, tpr_ADA, thresholds_ADA = roc_curve(y_test, ada_proba)
+AUC_ADA = auc(fpr_ADA, tpr_ADA)
+plt.plot([0, 1], [0,1 ], 'k--')
+plt.plot(fpr_ADA, tpr_ADA, label='ADABoost (area = {:.3f}'.format(AUC_ADA))
 
 
 plt.xlabel('False positive rate')

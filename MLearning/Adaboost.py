@@ -20,6 +20,8 @@ import numpy as np
 
 from MLearning.ScoringMethods import scoring_model
 
+import warnings
+warnings.filterwarnings(action="ignore", category=FutureWarning)
 # Set Seed
 random.seed(41)
 
@@ -62,7 +64,7 @@ X_test_s = X_test_s.set_index('Unnamed: 0') # X_test scaled and ready to go
 # Voting Classifier
 logR_clf = LogisticRegression() # Not Random
 rf_clf = RandomForestClassifier(n_estimators = 100, max_depth = 5)
-CART_clf = DecisionTreeClassifier(max_depth = 15, random_state = 41)
+CART_clf = DecisionTreeClassifier(max_depth = 1)
 svm_clf = svm.SVC()
 
 def simple_model():
