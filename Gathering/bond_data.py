@@ -24,9 +24,9 @@ investpy_tickers.remove('Greece 1Y')
 
 bonds_all = []
 for i in range(len(investpy_tickers)):
-    bonds = investpy.bonds.get_bond_historical_data(bond = investpy_tickers[0],
-                                                    from_date = '02/01/1997',
-                                                    to_date = '06/06/2020')
+    bonds = investpy.bonds.get_bond_historical_data(bond=investpy_tickers[0],
+                                                    from_date='02/01/1997',
+                                                    to_date='06/06/2020')
     bonds_all.append(bonds)
 
 bonds_close = []
@@ -34,12 +34,13 @@ bonds_close = []
 # Gather Closing price(Daily)
 for i in range(len(bonds_all)):
     close = pd.DataFrame(bonds_all[i]['Close'])
-    close = close.rename(columns = {'Close' : investpy_tickers[i]})
+    close = close.rename(columns={'Close' : investpy_tickers[i]})
     bonds_close.append(close)
 
+# Cut out the data we need
 bonds_dataset = bonds_close[0]
 for i in range(len(investpy_tickers) - 1):
-    bonds_dataset = pd.concat([bonds_dataset, bonds_close[i+1]], axis = 1)
+    bonds_dataset = pd.concat([bonds_dataset, bonds_close[i+1]], axis=1)
 
 bonds_dataset.to_csv(r"D:\Data\Grad\bonds_dataset.csv")
 

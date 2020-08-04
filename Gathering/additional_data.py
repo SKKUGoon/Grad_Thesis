@@ -26,14 +26,13 @@ for i in range(len(Fred_tickers)):
 additional = pd.DataFrame.from_dict(additional_data)
 add_start_index = list(additional.index).index(start_date)
 add_end_index = list(additional.index).index(end_date)
-additional = additional[(add_start_index) : (add_end_index)]
-add_data = additional.interpolate(method = 'time')
-add_data = add_data.fillna(0)
+# Cut out the data we need
+add_data = additional[(add_start_index) : (add_end_index)]
 print(add_data)
 
 add_data.to_csv(r"D:\Data\Grad\add_data.csv")
 # Graph
 for i in range(len(list(additional_data.keys()))):
-    additional_data[list(additional_data.keys())[i]].plot(label = list(additional_data.keys())[i])
+    additional_data[list(additional_data.keys())[i]].plot(label=list(additional_data.keys())[i])
 plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 plt.show()

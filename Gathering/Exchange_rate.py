@@ -31,9 +31,8 @@ for i in range(len(Fred_tickers)):
 fxrate = pd.DataFrame.from_dict(exchange_rate)
 add_start_index = list(fxrate.index).index(start_date)
 add_end_index = list(fxrate.index).index(end_date)
-fxrate = fxrate[(add_start_index) : (add_end_index)]
-fx_data = fxrate.interpolate(method = 'time')
-fx_data = fx_data.fillna(0)
+# Cut out the data we need
+fx_data = fxrate[(add_start_index) : (add_end_index)]
 print(fx_data)
 
 fx_data.to_csv(r"D:\Data\Grad\fx_data.csv")
