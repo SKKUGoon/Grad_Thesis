@@ -1,8 +1,8 @@
 from fredapi import Fred
 from pandas_datareader import data
-from typing import List, Dict
-
 import pandas as pd
+
+from typing import List, Dict
 
 import datetime
 import investpy
@@ -24,57 +24,10 @@ stock_start_index = list(United_States.index).index(start_date)
 stock_end_index = list(United_States.index).index(end_date)
 United_States = United_States[(stock_start_index) : (stock_end_index)]
 
-# From Yahoo
-America_dataset = {}
-tickers_ame = ['^GSPTSE', '^MERV', '^BVSP', '^MXX']
-countries_ame = ['CAN', 'ARG', 'BRA', 'MEX']
-
-for country in range(len(countries_ame)):
-    temp = data.DataReader(tickers_ame[country], 'yahoo', starting_date, ending_date)
-    temp = temp['Close'].rename(columns={'Close' : countries_ame[country]})
-    America_dataset[countries_ame[country]] = temp
-Ame_region = pd.DataFrame.from_dict(America_dataset)
-
-NS_Ame_region = pd.concat([United_States, Ame_region], axis=1) # Chile was deleted due to Data Shortage. NaN Exists
-
-
-# EUROPEAN STOCK INDEX
-European_dataset = {}
-countries_eu = ['GER', 'FR',
-                'SPA', 'NET', 'SWZ',
-                'BEL', 'AUS', 'DEN']
-tickers_eu = ['^GDAXI', '^FCHI',
-              '^IBEX', '^AEX', '^SSMI',
-              '^BFX', '^ATX', '^OMXC20',]
-for country in range(len(countries_eu)):
-    temp = data.DataReader(tickers_eu[country], 'yahoo', starting_date, ending_date)
-    temp = temp['Close'].rename(columns={'Close' : countries_eu[country]})
-    European_dataset[countries_eu[country]] = temp
-EU_region = pd.DataFrame.from_dict(European_dataset)
-
-
-# ASIAN STOCK INDEX
-Asian_dataset = {}
-countries_asia = ['CHI', 'JAP', 'INDA',
-                  'TAI', 'HK', 'PHIL', 'AUSTL']
-tickers_asia = ['000001.SS', '^N225', '^BSESN',
-                '^TWII', '^HSI', 'PSEI.PS', '^AXJO']
-for country in range(len(countries_asia)):
-    temp = data.DataReader(tickers_asia[country], 'yahoo', starting_date, ending_date)
-    temp = temp['Close'].rename(columns={'Close' : countries_asia[country]})
-    Asian_dataset[countries_asia[country]] = temp
-Asian_Region = pd.DataFrame.from_dict(Asian_dataset)
-Asia_region = Asian_Region
-
-"""peru 2000/07/03 ~, chile, indonesia, korea, thailand, pakistan, New Zealand,
-Malaysia 2001/08/13 ~, England 2001/01/03 ~, russia 1997/01/05 ~, sweden 1997/01/02 ~,
-norway, ireland 2001/08/13 ~, poland, greece 1997/11/18 ~, czech, hungary 2001/08/13 ~"""
-
 start_date = '02/01/2000'
 end_date = '06/06/2020'
-
-# Missing files append
-# count_list_ count_tickers country: order of these list should match for api request.
+United_States = United_States[start_date : end_date]
+# Get rid of yahoo. Integrate into investing.com api sources.
 
 def MVGenerater(total_file: Dict, region: List, column_name='Close') -> pd.DataFrame:
     """
@@ -108,21 +61,36 @@ def MVGenerater(total_file: Dict, region: List, column_name='Close') -> pd.DataF
 
     return base
 
-ame_add_str = ['peru', 'chile']
-asia_add_str = ['indone', 'kor', 'tha', 'pak', 'nz', 'mal']
-eu_add_str = ['uk', 'russia', 'sweden', 'norway', 'ireland', 'pol', 'grc', 'czh', 'hun']
+# count_list_ count_tickers country: order of these list should match for api request.
+ame_add_str = ['canada', 'argentina', 'brazil', 'mexico', 'peru', 'chile']
+asia_add_str = ['china', 'japan', 'india', 'taiwan', 'hong kong',
+                'phil', 'austl', 'indone', 'kor', 'tha',
+                'pak', 'nz', 'mal']
+eu_add_str = ['ger', 'fra', 'spa', 'net', 'swz',
+              'bel', 'ausr', 'den', 'uk', 'russia',
+              'sweden', 'norway', 'ireland', 'pol', 'grc',
+              'czh', 'hun']
 count_list_ = ame_add_str + asia_add_str + eu_add_str
 
-count_tickers = ['FTSE Peru', 'S&P CLX IPSA', 'IDX Composite', 'KOSPI',
-                 'SET', 'Karachi 100', 'NZX All', 'FTSE Malaysia',
-                 'FTSE 100', 'RTSI', 'OMXS30', 'Oslo OBX',
-                 'FTSE Ireland', 'WIG20', 'FTSE/Athex 20', 'FTSE czech republic','FTSE Hungary']
+count_tickers_ame = ['S&P/TSX', 'S&P Merval', 'Bovespa', 'S&P/BMV IPC', 'FTSE Peru', 'S&P CLX IPSA']
+count_tickers_asia = ['Shanghai', 'Nikkei 225', 'BSE Sensex', 'Taiwan Weighted', 'Hang Seng',
+                      'PSEi Composite', 'S&P/ASX 200', 'IDX Composite', 'KOSPI', 'SET',
+                      'Karachi 100', 'NZX All', 'FTSE Malaysia']
+count_tickers_eu = ['DAX', 'CAC 40', 'IBEX 35', 'AEX', 'SMI',
+                    'BEL 20', 'ATX', 'OMXC20', 'FTSE 100', 'RTSI',
+                    'OMXS30', 'Oslo OBX', 'FTSE Ireland', 'WIG20', 'FTSE/Athex 20',
+                    'FTSE czech republic','FTSE Hungary']
+count_tickers = count_tickers_ame + count_tickers_asia + count_tickers_eu
 
-country = ['peru', 'chile', 'indonesia', 'south korea',
-           'thailand', 'pakistan', 'new zealand', 'malaysia',
-           'united kingdom', 'russia', 'sweden', 'norway',
-           'ireland', 'poland', 'greece', 'czech republic', 'hungary']
-
+country_ame = ['canada', 'argentina', 'brazil', 'mexico', 'peru', 'chile']
+country_asia = ['china', 'japan', 'india', 'taiwan', 'hong kong',
+                'philippines', 'australia', 'indonesia', 'south korea','thailand',
+                'pakistan', 'new zealand', 'malaysia']
+country_eu = ['germany', 'france', 'spain', 'netherlands', 'switzerland',
+              'belgium', 'austria', 'denmark', 'united kingdom', 'russia',
+              'sweden', 'norway', 'ireland', 'poland', 'greece',
+              'czech republic', 'hungary']
+country = country_ame + country_asia + country_eu
 missing = {}
 for i in range(len(count_list_)):
     missing[count_list_[i]] = investpy.get_index_historical_data(index=count_tickers[i],
@@ -130,21 +98,56 @@ for i in range(len(count_list_)):
                                                                  from_date=start_date,
                                                                  to_date=end_date)
 
-
 ame_additional = MVGenerater(missing, ame_add_str)
 eu_additional = MVGenerater(missing, eu_add_str)
 asia_additional = MVGenerater(missing, asia_add_str)
 
-ame_total = pd.concat([NS_Ame_region, ame_additional], axis = 1)
+# Delete columns that has too little data: austria, india, taiwan, philippinese
+col_ = list(eu_additional.columns)
+col_.remove('ausr')
+eu_additional = eu_additional[col_]
+
+col_2 = list(asia_additional.columns)
+rv = ['india', 'taiwan', 'phil']
+for i in rv:
+    col_2.remove(i)
+asia_additional = asia_additional[col_2]
+
+# India, taiwan, philippines and Austria needed to be scrapped from yahoo.
+countries_asia = ['india', 'taiwan', 'phil']
+tickers_asia = ['^BSESN', '^TWII', 'PSEI.PS']
+
+countries_eu = ['ausr']
+tickers_eu = ['^ATX']
+
+countries = countries_asia + countries_eu
+tickers = tickers_asia + tickers_eu
+
+dataset = {}
+for country in range(len(countries)):
+    temp = data.DataReader(tickers[country], 'yahoo', starting_date, ending_date)
+    temp = temp['Close'].rename(columns={'Close' : countries[country]})
+    dataset[countries[country]] = temp
+
+more = pd.DataFrame.from_dict(dataset)[start_date : end_date]
+asia_more = more[countries_asia]
+eu_more = more[countries_eu]
+
+# starting_date = '1997-01-02'
+# ending_date = '2020-05-15'
+# start_date = '02/01/2000'
+# end_date = '06/06/2020'
+
+alt_start_date = '31/01/2000'
+ame_total = pd.concat([United_States, ame_additional], axis = 1)[alt_start_date:]
+ame_total = ame_total.shift(1) # Since at the time of asia market closing time,
+                               # we don't have the same date's closure information of America
 ame_total.to_csv(r'D:\Data\Grad\ame_total_dataset.csv')
-eu_total = pd.concat([EU_region, eu_additional], axis = 1)
+eu_total = pd.concat([eu_more, eu_additional], axis = 1)[start_date:]
 eu_total.to_csv(r'D:\Data\Grad\eu_total_dataset.csv')
-asia_total = pd.concat([Asia_region, asia_additional], axis = 1)
+asia_total = pd.concat([asia_more, asia_additional], axis = 1)[start_date:]
 asia_total.to_csv(r'D:\Data\Grad\asia_total_dataset.csv')
 
-total_stock_index_dataset = pd.concat([NS_Ame_region, ame_additional,
-                                       EU_region, eu_additional,
-                                       Asia_region, asia_additional], axis = 1)
-total_stock_index_dataset = total_stock_index_dataset.interpolate(method = 'time')
+total_stock_index_dataset = pd.concat([ame_total, eu_total, asia_total], axis = 1)
 total_stock_index_dataset.to_csv(r'D:\Data\Grad\total_stock_index_dataset.csv')
 print(total_stock_index_dataset)
