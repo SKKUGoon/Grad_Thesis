@@ -29,7 +29,7 @@ end_date = '06/06/2020'
 United_States = United_States[start_date : end_date]
 # Get rid of yahoo. Integrate into investing.com api sources.
 
-def MVGenerater(total_file: Dict, region: List, column_name='Close') -> pd.DataFrame:
+def v_generator(total_file: Dict, region: List, column_name='Close') -> pd.DataFrame:
     """
     :param total_file: Total missing file collected from investpy
     :param region: ame asia or eu
@@ -98,9 +98,9 @@ for i in range(len(count_list_)):
                                                                  from_date=start_date,
                                                                  to_date=end_date)
 
-ame_additional = MVGenerater(missing, ame_add_str)
-eu_additional = MVGenerater(missing, eu_add_str)
-asia_additional = MVGenerater(missing, asia_add_str)
+ame_additional = v_generator(missing, ame_add_str)
+eu_additional = v_generator(missing, eu_add_str)
+asia_additional = v_generator(missing, asia_add_str)
 
 # Delete columns that has too little data: austria, india, taiwan, philippinese
 col_ = list(eu_additional.columns)
