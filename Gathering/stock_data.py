@@ -53,8 +53,8 @@ def MVGenerater(total_file: Dict, region: List, column_name='Close') -> pd.DataF
     base.index = pd.to_datetime(base.index)
 
     # Dictionary to pd.Dataframe
-    for i in range(len(saving_spot.keys())):
-        base = pd.concat([base, saving_spot[list(saving_spot.keys())[i]]], axis=1)
+    for val in saving_spot.values():
+        base = pd.concat([base, val], axis=1)
 
     # Index to datetime
     base.index = pd.to_datetime(base.index)
