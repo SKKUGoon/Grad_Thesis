@@ -1,5 +1,5 @@
 import pandas as pd
-from Dep_variable.Methods import preprocessing
+from dep_variable.methods import Preprocessing
 # Creating Total Work Space
 # Deprecated
 
@@ -18,7 +18,7 @@ Work_Data = Work_Data.interpolate(method = 'time') # Interpolate := fill in the 
 Work_Data = Work_Data[1:] # Erase January the First, Since it's all NaN, and interpolate doesn't work.
 
 # 1 lag crisis coding 1%
-WD = preprocessing(Work_Data)
+WD = Preprocessing(Work_Data)
 crisis_var_1lag_temp = {}
 for i in range(len(Work_Data.columns)):
     crisis_var_1lag_temp[Work_Data.columns[i]] = WD.crisis_code_200(i, 1, 0.01)
@@ -39,7 +39,7 @@ for key in crisis_var_20lag_temp.keys():
 crisis_var_20lag.to_csv(r"D:\Data\Grad\20lag_crisis.csv")
 
 # 1 lag crisis coding 5%
-WD = preprocessing(Work_Data)
+WD = Preprocessing(Work_Data)
 crisis_var_1lag_temp = {}
 for i in range(len(Work_Data.columns)):
     crisis_var_1lag_temp[Work_Data.columns[i]] = WD.crisis_code_200(i, 1, 0.05)

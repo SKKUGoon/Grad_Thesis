@@ -10,18 +10,18 @@ from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 
-from MLearning.ScoringMethods import scoring_model
+from mlearning.scoringMethods import scoring_model
 
 from keras.utils import np_utils
 from keras.models import Sequential, load_model
 from keras.layers import Dense, Activation, Dropout
+import tensorflow as tf
 
 import random
 import warnings
 warnings.filterwarnings(action = "ignore", category = FutureWarning)
 
 # Set Seed
-random.seed(41)
 
 # Data_using
 start = timeit.default_timer()
@@ -58,58 +58,28 @@ X_test_s = pd.concat([date_t, X_test_s], axis = 1) # X_train scaled and ready to
 X_train_s = X_train_s.set_index('Unnamed: 0')
 X_test_s = X_test_s.set_index('Unnamed: 0') # X_test scaled and ready to go
 
-# Neural Networks
-model = Sequential()
-model.add(Dense(units = 50, input_dim = len(X_train_s.columns), activation = 'relu'))
-model.add(Dense(units = 1, activation = 'sigmoid'))
-model.compile(loss = 'binary_crossentropy', optimizer = 'sgd')
+# Model _ Random Forest
+robust_sens = {}
+robust_spec = {}
+gm = {}
+for j in range(1,30):
+    robust_check1 = []
+    robust_check2 = []
+    robust_gmean = []
+    for i in range(20):
+        rf_clf = RandomForestClassifier(n_estimators = 100, max_depth = j)
+        rf_clf.fit(X_train_s, y_train)
+        y_pred_rf = rf_clf.predict((X_test_s[X_train_s.columns]))
+        acc_rf = scoring_model(y_test, y_pred_rf)
 
-acc_NN_dict = {'gmean' : [],
-               'LP' : [],
-               'LR' : [],
-               'DP' : [],
-               'Youden' : [],
-               'BA' : []} # store 20 iterations result
-for iter_ in range(0,2):
-        np.random.seed(iter_)
-        result1 = model.fit(X_train_s, y_train, verbose = 0)
-        y_pred_NN_temp = model.predict(X_test_s)
-        y_pred_NN = []
-        for i in range(len(y_pred_NN_temp)):
-            if y_pred_NN_temp[i] >= 0.5:
-                y_pred_NN.append(1)
-            else:
-                y_pred_NN.append(-1)
-        acc_NN = scoring_model(y_test, y_pred_NN)
+        robust_check1.append(acc_rf.sensitivity())
+        robust_check2.append(acc_rf.specificity())
+        robust_gmean.append(acc_rf.gmean())
+    robust_sens[f'max_depth = {j}'] = np.mean(robust_check1)
+    robust_spec[f'max_depth = {j}'] = np.mean(robust_check2)
+    gm[f'max_depth = {j}'] = np.mean(robust_gmean)
+    print(f'max_depth {j} checked')
 
-        # add metrics
-        acc_NN_dict['gmean'].append(acc_NN.gmean())
-        acc_NN_dict['LP'].append(acc_NN.LP())
-        acc_NN_dict['LR'].append(acc_NN.LR())
-        acc_NN_dict['DP'].append(acc_NN.DP())
-        acc_NN_dict['Youden'].append(acc_NN.Youden())
-        acc_NN_dict['BA'].append(acc_NN.BA())
-        # print out phase number 1 ~ 20
-        print('NN iteration phase', (iter_ + 0))
 
-dictkey = list(acc_NN_dict.keys())
-acc5 = {'gmean' : np.mean(acc_NN_dict['gmean']),
-        'LP' : np.mean(acc_NN_dict['LP']),
-        'LR' : np.mean(acc_NN_dict['LR']),
-        'DP' : np.mean(acc_NN_dict['DP']),
-        'Youden' : np.mean(acc_NN_dict['Youden']),
-        'BA' : np.mean(acc_NN_dict['BA'])}
-print('Neural Net', acc5)
 
-fpr_NN, tpr_NN, thresholds_NN = roc_curve(y_test, y_pred_NN_temp.ravel())
-auc_keras = auc(fpr_NN, tpr_NN)
-plt.plot([0, 1], [0, 1], 'k--')
-plt.plot(fpr_NN, tpr_NN, label='NN (area = {:.3f})'.format(auc_keras))
-
-plt.xlabel('False positive rate')
-plt.ylabel('True positive rate')
-plt.title('ROC curve')
-
-plt.legend(loc='best')
-
-plt.show()
+print(robust_sens, '\n', robust_spec, '\n', gm)

@@ -18,7 +18,7 @@ import timeit
 import pandas as pd
 import numpy as np
 
-from MLearning.ScoringMethods import scoring_model
+from mlearning.scoringMethods import scoring_model
 
 import warnings
 warnings.filterwarnings(action="ignore", category=FutureWarning)

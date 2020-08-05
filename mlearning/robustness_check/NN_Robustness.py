@@ -6,7 +6,7 @@ import timeit
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 
-from MLearning.ScoringMethods import scoring_model
+from mlearning.scoringMethods import scoring_model
 
 
 from keras.models import Sequential, load_model

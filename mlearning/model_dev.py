@@ -10,7 +10,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 
-from MLearning.ScoringMethods import scoring_model
+from mlearning.scoringMethods import scoring_model
 
 from keras.utils import np_utils
 from keras.models import Sequential, load_model

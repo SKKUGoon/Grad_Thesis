@@ -6,7 +6,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 
-from MLearning.ScoringMethods import scoring_model
+from mlearning.scoringMethods import scoring_model
 
 import matplotlib.pyplot as plt
 
