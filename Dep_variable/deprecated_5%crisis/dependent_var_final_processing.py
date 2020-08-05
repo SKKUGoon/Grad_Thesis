@@ -1,6 +1,8 @@
 import pandas as pd
 from Dep_variable.Methods import preprocessing
 # Creating Total Work Space
+# Deprecated
+
 Data1 = pd.read_csv(r"D:\Data\Grad\total_stock_index_dataset.csv") # Stock data
 Data2 = pd.read_csv(r"D:\Data\Grad\add_data.csv") # Addition data(i.e. gold, oil)
 Data3 = pd.read_csv(r"D:\Data\Grad\fx_data.csv") # Exchange_rate
