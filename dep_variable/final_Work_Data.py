@@ -51,8 +51,8 @@ for i in range(len(lagged_data.keys())):
     lag_temp = pd.concat([lag_temp, lagged_data[keyvalue[i]]], axis=1)
 
 # Create log returns for stock indexes
-ln_d4 = np.log(using[3]) - np.log(using[3].shift(1))
-lnsq_d4 = ln_d4 ** 2 # sqrd to take in the effect of return-volatility
+#ln_d4 = np.log(using[3]) - np.log(using[3].shift(1))
+#lnsq_d4 = ln_d4 ** 2 # sqrd to take in the effect of return-volatility
 
 # Cut data
 s = '2001-12-06'
@@ -62,7 +62,7 @@ ed = datetime.date(2020, 5, 15)
 
 fwd = pd.concat([using[4].shift(-1), using[5].shift(-1), # using[4] and using[5] contains dependent data.
                  using[0], using[1], using[2], using[3],
-                 using[6], ln_d4, lnsq_d4, lag_temp], axis=1)
+                 using[6], lag_temp], axis=1)
 
 fwd = fwd[s : e]
 # U.S 1Y 10Y Japan 1Y 10Y has nans.
