@@ -55,10 +55,12 @@ x_test_s = x_test_s.set_index('Unnamed: 0') # X_test scaled and ready to go
 robust_sens = {}
 robust_spec = {}
 gm = {}
+acc = {}
 for j in range(1,30):
     robust_check1 = []
     robust_check2 = []
     robust_gmean = []
+    robust_acc = []
     for i in range(20):
         rf_clf = RandomForestClassifier(n_estimators=100, max_depth=j)
         rf_clf.fit(x_train_s, y_train)
@@ -68,9 +70,11 @@ for j in range(1,30):
         robust_check1.append(acc_rf.sensitivity())
         robust_check2.append(acc_rf.specificity())
         robust_gmean.append(acc_rf.gmean())
+        robust_acc.append(acc_rf.accuracy())
     robust_sens[f'max_depth = {j}'] = np.mean(robust_check1)
     robust_spec[f'max_depth = {j}'] = np.mean(robust_check2)
     gm[f'max_depth = {j}'] = np.mean(robust_gmean)
+    acc[f'max_depth = {j}'] = np.mean(robust_acc)
     print(f'max_depth {j} checked')
 
 

@@ -52,13 +52,13 @@ spec = list()
 gm = list() # store 20 iterations result
 for j in range(20):
     model = Sequential()
-    model.add(Dense(units=45, input_dim=len(X_train_s.columns), activation='elu'))
+    model.add(Dense(units=45, input_dim=len(x_train_s.columns), activation='elu'))
     model.add(Dense(units=20, activation='relu'))
     model.add(Dense(units=10, activation='linear'))
     model.add(Dense(units=1, activation='tanh'))
     model.compile(loss='binary_crossentropy', optimizer='adam')
-    result1 = model.fit(X_train_s, y_train, verbose=0)
-    y_pred_NN_temp = model.predict(X_test_s)
+    result1 = model.fit(x_train_s, y_train, verbose=0)
+    y_pred_NN_temp = model.predict(x_test_s)
     y_pred_NN = []
     for i in range(len(y_pred_NN_temp)):
         if y_pred_NN_temp[i] >= 0:
