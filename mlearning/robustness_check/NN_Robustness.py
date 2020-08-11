@@ -20,37 +20,30 @@ warnings.filterwarnings(action = "ignore", category = FutureWarning)
 # Data_using
 start = timeit.default_timer()
 
-WD = pd.read_csv(r'D:\Data\Grad\test_Work_Data_w_lag.csv')
-WD = WD.set_index(WD.columns[0])
-WD.index = pd.to_datetime(WD.index)
+wd = pd.read_csv(r'D:\Data\Grad\test_Work_Data_w_lag.csv')
+wd = wd.set_index(wd.columns[0])
+wd.index = pd.to_datetime(wd.index)
 
-WD1 = WD[WD.columns[0:4]].fillna(method = 'ffill')
-WD2 = WD[WD.columns[4:1078]].interpolate(method = 'time')
-WD = pd.concat([WD1, WD2], axis = 1)
+x = wd[wd.columns[1:]]
+y = wd['korclf1']
 
-Indep_var = pd.read_csv(r"D:\Data\Grad\X_filitered_lasso.csv")
-Indep_var = Indep_var.set_index(Indep_var.columns[0])
-Indep_var.index = pd.to_datetime(Indep_var.index)
-
-y = WD['kor class']
-X = WD[Indep_var.columns]
 
 # Create trainig set, testing set.
-X_train, X_test,y_train, y_test = train_test_split(X, y,
-                                                   test_size=0.3,
-                                                   shuffle=False) # Split the data. For now no validation set
-                                                                  # no random split. so shuffle = false
+x_train, x_test, y_train, y_test = train_test_split(x, y,
+                                                    test_size = 0.3,
+                                                    shuffle = False) # Split the data. For now no validation set
+                                                                    # no random split. so shuffle = false
 # Original Data
 scale = StandardScaler() # Scale the data.
-scale.fit(X_train)
-X_train_s = pd.DataFrame(scale.transform(X_train), columns = list(X_train.columns))
-X_test_s = pd.DataFrame(scale.transform(X_test), columns = list(X_test.columns))
-date = pd.DataFrame(X_train.index)
-date_t = pd.DataFrame(X_test.index)
-X_train_s = pd.concat([date, X_train_s], axis=1)
-X_test_s = pd.concat([date_t, X_test_s], axis=1) # X_train scaled and ready to go
-X_train_s = X_train_s.set_index('Unnamed: 0')
-X_test_s = X_test_s.set_index('Unnamed: 0') # X_test scaled and ready to go
+scale.fit(x_train)
+x_train_s = pd.DataFrame(scale.transform(x_train), columns = list(x_train.columns))
+x_test_s = pd.DataFrame(scale.transform(x_test), columns = list(x_test.columns))
+date = pd.DataFrame(x_train.index)
+date_t = pd.DataFrame(x_test.index)
+x_train_s = pd.concat([date, x_train_s], axis = 1)
+x_test_s = pd.concat([date_t, x_test_s], axis = 1) # X_train scaled and ready to go
+x_train_s = x_train_s.set_index('Unnamed: 0')
+x_test_s = x_test_s.set_index('Unnamed: 0') # X_test scaled and ready to go
 
 
 # Neural Networks

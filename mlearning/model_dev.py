@@ -27,42 +27,35 @@ random.seed(41)
 # Data_using
 start = timeit.default_timer()
 
-WD = pd.read_csv(r'D:\Data\Grad\test_Work_Data_w_lag.csv')
-WD = WD.set_index(WD.columns[0])
-WD.index = pd.to_datetime(WD.index)
+wd = pd.read_csv(r'D:\Data\Grad\test_Work_Data_w_lag.csv')
+wd = wd.set_index(wd.columns[0])
+wd.index = pd.to_datetime(wd.index)
 
-WD1 = WD[WD.columns[0:4]].fillna(method = 'ffill')
-WD2 = WD[WD.columns[4:1078]].interpolate(method = 'time')
-WD = pd.concat([WD1, WD2], axis = 1)
+x = wd[wd.columns[1:]]
+y = wd['korclf1']
 
-Indep_var = pd.read_csv(r"D:\Data\Grad\X_filitered_lasso.csv")
-Indep_var = Indep_var.set_index(Indep_var.columns[0])
-Indep_var.index = pd.to_datetime(Indep_var.index)
-
-y = WD['kor class']
-X = WD[Indep_var.columns]
 
 # Create trainig set, testing set.
-X_train, X_test,y_train, y_test = train_test_split(X, y,
-                                                   test_size = 0.3,
-                                                   shuffle = False) # Split the data. For now no validation set
+x_train, x_test, y_train, y_test = train_test_split(x, y,
+                                                    test_size = 0.3,
+                                                    shuffle = False) # Split the data. For now no validation set
                                                                     # no random split. so shuffle = false
 # Original Data
 scale = StandardScaler() # Scale the data.
-scale.fit(X_train)
-X_train_s = pd.DataFrame(scale.transform(X_train), columns = list(X_train.columns))
-X_test_s = pd.DataFrame(scale.transform(X_test), columns = list(X_test.columns))
-date = pd.DataFrame(X_train.index)
-date_t = pd.DataFrame(X_test.index)
-X_train_s = pd.concat([date, X_train_s], axis = 1)
-X_test_s = pd.concat([date_t, X_test_s], axis = 1) # X_train scaled and ready to go
-X_train_s = X_train_s.set_index('Unnamed: 0')
-X_test_s = X_test_s.set_index('Unnamed: 0') # X_test scaled and ready to go
+scale.fit(x_train)
+x_train_s = pd.DataFrame(scale.transform(x_train), columns = list(x_train.columns))
+x_test_s = pd.DataFrame(scale.transform(x_test), columns = list(x_test.columns))
+date = pd.DataFrame(x_train.index)
+date_t = pd.DataFrame(x_test.index)
+x_train_s = pd.concat([date, x_train_s], axis = 1)
+x_test_s = pd.concat([date_t, x_test_s], axis = 1) # X_train scaled and ready to go
+x_train_s = x_train_s.set_index('Unnamed: 0')
+x_test_s = x_test_s.set_index('Unnamed: 0') # X_test scaled and ready to go
 
 # logistic regression
 from sklearn.linear_model import LogisticRegression
-logR_clf = LogisticRegression().fit(X_train_s, y_train)
-y_pred_logR = logR_clf.predict(X_test_s[X_train_s.columns])
+logR_clf = LogisticRegression().fit(x_train_s, y_train)
+y_pred_logR = logR_clf.predict(x_test_s[x_train_s.columns])
 acc_logR = scoring_model(y_test, y_pred_logR)
 print(acc_logR.sensitivity(), acc_logR.specificity())
 acc1 = {'gmean' : acc_logR.gmean(),
@@ -75,8 +68,8 @@ print('logistic_regression', acc1)
 
 # Random Forest
 rf_clf = RandomForestClassifier(n_estimators = 100, max_depth = 5, random_state = 42)
-rf_clf.fit(X_train_s, y_train)
-y_pred_rf = rf_clf.predict((X_test_s[X_train_s.columns]))
+rf_clf.fit(x_train_s, y_train)
+y_pred_rf = rf_clf.predict((x_test_s[x_train_s.columns]))
 acc_rf = scoring_model(y_test, y_pred_rf)
 
 print(acc_rf.sensitivity(), acc_rf.specificity())
@@ -91,8 +84,8 @@ print('Random forest', acc2)
 # support vector machine
 from sklearn import svm
 svm_clf = svm.SVC()
-svm_clf.fit(X_train_s, y_train)
-y_pred_svm = svm_clf.predict((X_test_s[X_train_s.columns]))
+svm_clf.fit(x_train_s, y_train)
+y_pred_svm = svm_clf.predict((x_test_s[x_train_s.columns]))
 sv = svm_clf.support_vectors_
 acc_svm = scoring_model(y_test, y_pred_svm)
 print(acc_svm.sensitivity(), acc_svm.specificity())
@@ -106,8 +99,8 @@ print('Support Vector machine', acc3)
 
 # CART
 CART_clf = DecisionTreeClassifier(max_depth = 1, random_state = 42) # deal with max_depth later
-CART_clf.fit(X_train_s, y_train)
-y_pred_CART = CART_clf.predict(X_test_s)
+CART_clf.fit(x_train_s, y_train)
+y_pred_CART = CART_clf.predict(x_test_s)
 acc_CART = scoring_model(y_test, y_pred_CART)
 acc4 = {'gmean' : acc_CART.gmean(),
         'LP' : acc_CART.LP(),
@@ -132,13 +125,13 @@ acc_NN_dict = {'gmean' : [],
                'BA' : []} # store 20 iterations result
 for iter_ in range(10):
     model = Sequential()
-    model.add(Dense(units=45, input_dim=len(X_train_s.columns), activation='elu'))
+    model.add(Dense(units=45, input_dim=len(x_train_s.columns), activation='elu'))
     model.add(Dense(units=20, activation='relu'))
     model.add(Dense(units=10, activation='linear'))
     model.add(Dense(units=1, activation='tanh'))
     model.compile(loss='binary_crossentropy', optimizer='adam')
-    result1 = model.fit(X_train_s, y_train, verbose=0)
-    y_pred_NN_temp = model.predict(X_test_s)
+    result1 = model.fit(x_train_s, y_train, verbose=0)
+    y_pred_NN_temp = model.predict(x_test_s)
     y_pred_NN = []
     for i in range(len(y_pred_NN_temp)):
         if y_pred_NN_temp[i] >= 0:
@@ -172,8 +165,8 @@ votingClf = VotingClassifier([('clf1', logR_clf), ('clf2', rf_clf),
                               ('clf3', CART_clf)], voting='soft')
 
 adaboost = AdaBoostClassifier(base_estimator=votingClf)
-adaboost.fit(X_train_s, y_train)
-y_pred_adaboost = adaboost.predict(X_test_s)
+adaboost.fit(x_train_s, y_train)
+y_pred_adaboost = adaboost.predict(x_test_s)
 acc_adaboost = scoring_model(y_test, y_pred_adaboost)
 acc4 = {'gmean' : acc_adaboost.gmean(),
         'LP' : acc_adaboost.LP(),
@@ -189,8 +182,8 @@ print('acc_adaboost', acc4)
 
 # Logistic Regression
 logR_proba = []
-pr = logR_clf.predict_proba(X_test_s)
-for i in range(len(X_test_s)):
+pr = logR_clf.predict_proba(x_test_s)
+for i in range(len(x_test_s)):
     logR_proba.append(pr[i][1])
 fpr_NN, tpr_NN, thresholds_NN = roc_curve(y_test, logR_proba)
 AUC_logR = auc(fpr_NN, tpr_NN)
@@ -199,8 +192,8 @@ plt.plot(fpr_NN, tpr_NN, label='LogR (area = {:.3f})'.format(AUC_logR))
 
 # Random Forest
 rf_proba = []
-pr = rf_clf.predict_proba(X_test_s)
-for i in range(len(X_test_s)):
+pr = rf_clf.predict_proba(x_test_s)
+for i in range(len(x_test_s)):
     rf_proba.append(pr[i][1])
 fpr_rf, tpr_rf, thresholds_rf = roc_curve(y_test, rf_proba)
 AUC_RF = auc(fpr_rf, tpr_rf)
@@ -221,7 +214,7 @@ plt.plot(fpr_NN, tpr_NN, label='Neural Net (area = {:.3f})'.format(AUC_NN))
 
 # Adaboost
 ada_proba = []
-a = adaboost.predict_proba(X_test_s)
+a = adaboost.predict_proba(x_test_s)
 for i in range(len(y_test)):
     ada_proba.append(a[i][1])
 
