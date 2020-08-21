@@ -80,9 +80,8 @@ class scoring_model:
 
 
     def specificity(self) -> float:
-        spec = self.TN / (self.TN + self.FP)
         if (self.TN + self.FP) == 0:
-            spec = np.nan
+            spec = np.inf
         else:
             spec = self.TN / (self.TN + self.FP)
         return spec
