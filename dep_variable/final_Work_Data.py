@@ -17,6 +17,25 @@ def refurbish_dataframe(dataframe_, nan_option='Discrete', lag_option=0) -> pd.D
     dataframe_ = dataframe_.shift(lag_option)
     return dataframe_
 
+
+def renamecolumns(original: pd.DataFrame, rename_with: str) -> pd.DataFrame:
+    """
+    Renames the DataFrame with particular str(rename_with)
+    """
+    o = list(original.columns)
+    res = list()
+    for names in o:
+        ren = names + ' ' + rename_with
+        res.append(ren)
+    # Renaming purposed Dictionary
+    rendic = dict()
+    for i in range(len(res)):
+        rendic[o[i]] = res[i]
+
+    renamed = original.rename(columns=rendic)
+
+    return renamed
+
 data1 = pd.read_csv(r"D:\Data\Grad\add_data.csv") # Addition data(i.e. gold, oil)
 data2 = pd.read_csv(r"D:\Data\Grad\fx_data.csv") # Exchange_rate
 data3 = pd.read_csv(r"D:\Data\Grad\bonds_dataset.csv") # Raw bond data
@@ -51,9 +70,10 @@ for i in range(len(lagged_data.keys())):
     lag_temp = pd.concat([lag_temp, lagged_data[keyvalue[i]]], axis=1)
 
 # Create log returns for stock indexes
-#ln_d4 = np.log(using[3]) - np.log(using[3].shift(1))
-#lnsq_d4 = ln_d4 ** 2 # sqrd to take in the effect of return-volatility
-
+ln_d4 = np.log(using[3]) - np.log(using[3].shift(1))
+ln_d4 = renamecolumns(ln_d4, '1dayrt')
+lnsq_d4 = ln_d4 ** 2 # sqrd to take in the effect of return-volatility
+lnsq_d4 = renamecolumns(lnsq_d4, '1dayvol')
 # Cut data
 s = '2001-12-06'
 sd = datetime.date(2001, 12, 6)
@@ -62,16 +82,12 @@ ed = datetime.date(2020, 5, 15)
 
 fwd = pd.concat([using[4].shift(-1), using[5].shift(-1), # using[4] and using[5] contains dependent data.
                  using[0], using[1], using[2], using[3],
-                 using[6], lag_temp], axis=1)
+                 using[6], lag_temp, lnsq_d4, ln_d4], axis=1)
 
 fwd = fwd[s : e]
 # U.S 1Y 10Y Japan 1Y 10Y has nans.
+# nz has inf when taken log
 # Delete them for now
+fwd = fwd.replace([np.inf, -np.inf], np.nan)
 fwd = fwd.dropna(axis='columns')
 fwd.to_csv(r'D:\Data\Grad\test_Work_Data_w_lag.csv', index=True)
-
-# Data Description
-# Dep_var : 'kor class'
-# it has 3565 1s, and 3170 -1s
-# no np.nans in the system.
-# size : 6735rows * 433 columns
