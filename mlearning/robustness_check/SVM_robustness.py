@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 import timeit
 
@@ -70,10 +69,27 @@ for c_val in [1, 50, 100]:
 
         # Boosting element
         if t.accuracy() >= 0.5:
-            list.append((c_val, sigma_val))
+            cdt = [c_val, sigma_val]
+            boostadd.append(cdt)
+        print(f'sigma value {sigma_val} checked')
 
     sens[f'C = {c_val}'] = sens_sigma
     spec[f'C = {c_val}'] = spec_sigma
     gm[f'C = {c_val}'] = gm_sigma
     acc[f'C = {c_val}'] = acc_sigma
+    print(f'C value {c_val} checked')
+
+print(sens, '\n', spec, '\n', gm, '\n', acc)
+print(boostadd)
+
+# Graph
+x_ = list(range(1,20))
+
+for i in range(3):
+    plt.plot(x_, gm[list(gm.keys())[i]], color='b', linestyle='dashed', label='gmean')
+    plt.plot(x_, acc[list(acc.keys())[i]], color='b', label='accuracy')
+    plt.xlabel('sigma')
+    plt.title(f'C={i+1}')
+    plt.legend()
+    plt.show()
 
