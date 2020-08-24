@@ -80,7 +80,7 @@ sd = datetime.date(2001, 12, 6)
 e = '2020-05-14'
 ed = datetime.date(2020, 5, 15)
 
-fwd = pd.concat([using[4].shift(-1), using[5].shift(-1), # using[4] and using[5] contains dependent data.
+fwd = pd.concat([using[4].shift(-1), # using[4] and using[5] contains dependent data.
                  using[0], using[1], using[2], using[3],
                  using[6], lag_temp, lnsq_d4, ln_d4], axis=1)
 
