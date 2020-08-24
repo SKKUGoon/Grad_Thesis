@@ -69,11 +69,11 @@ lag_temp = lagged_data[keyvalue[0]]
 for i in range(len(lagged_data.keys())):
     lag_temp = pd.concat([lag_temp, lagged_data[keyvalue[i]]], axis=1)
 
-# Create log returns for stock indexes
-ln_d4 = np.log(using[3]) - np.log(using[3].shift(1))
-ln_d4 = renamecolumns(ln_d4, '1dayrt')
+# Create log returns for stock indexes(over a week)
+ln_d4 = np.log(using[3]) - np.log(using[3].shift(7))
+ln_d4 = renamecolumns(ln_d4, '7dayrt')
 lnsq_d4 = ln_d4 ** 2 # sqrd to take in the effect of return-volatility
-lnsq_d4 = renamecolumns(lnsq_d4, '1dayvol')
+lnsq_d4 = renamecolumns(lnsq_d4, '7dayvol')
 # Cut data
 s = '2001-12-06'
 sd = datetime.date(2001, 12, 6)
@@ -88,6 +88,7 @@ fwd = fwd[s : e]
 # U.S 1Y 10Y Japan 1Y 10Y has nans.
 # nz has inf when taken log
 # Delete them for now
-fwd = fwd.replace([np.inf, -np.inf], np.nan)
+fwd = fwd.replace([np.inf, -np.inf, 0], np.nan)
 fwd = fwd.dropna(axis='columns')
 fwd.to_csv(r'D:\Data\Grad\test_Work_Data_w_lag.csv', index=True)
+print(fwd)
