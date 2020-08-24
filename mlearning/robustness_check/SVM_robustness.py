@@ -46,15 +46,34 @@ x_test_s = x_test_s.set_index('Unnamed: 0') # X_test scaled and ready to go
 # sklearn specifies their kernel as np.exp(-gamma || x-x' || **2)
 # gamma = 1/(2sigma**2)
 
-def mysvc(c, sigma, degree):
+def mysvc(c, sigma, k='rbf'):
     g = 1 / (2 * sigma**2)
-    svm_clf = svm.SVC(C = c, gamma=g, kernel='rbf')
+    svm_clf = svm.SVC(C = c, gamma=g, kernel=k)
     return svm_clf
 
-for i in [1, 50, 100]:
-    for j in range(1,20):
-        m = mysvc(i, j)
+boostadd = list()
+sens, spec, gm, acc = dict(), dict(), dict(), dict()
+
+for c_val in [1, 50, 100]:
+    sens_sigma, spec_sigma, gm_sigma, acc_sigma = list(), list(), list(), list()
+    for sigma_val in range(1, 20):
+        m = mysvc(c_val, sigma_val)
         m.fit(x_train_s, y_train)
         pred = m.predict(x_test_s)
+
+        # Metrics
         t = scoring_model(y_test, pred)
-        print(f'C = {i}, sigma = {j}', t.accuracy())
+        sens_sigma.append(t.sensitivity())
+        spec_sigma.append(t.specificity())
+        gm_sigma.append(t.gmean())
+        acc_sigma.append(t.accuracy())
+
+        # Boosting element
+        if t.accuracy() >= 0.5:
+            list.append((c_val, sigma_val))
+
+    sens[f'C = {c_val}'] = sens_sigma
+    spec[f'C = {c_val}'] = spec_sigma
+    gm[f'C = {c_val}'] = gm_sigma
+    acc[f'C = {c_val}'] = acc_sigma
+
