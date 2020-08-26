@@ -27,7 +27,7 @@ y = wd['korclf1']
 # Create trainig set, testing set.
 x_train, x_test, y_train, y_test = train_test_split(x, y,
                                                     test_size=0.3,
-                                                    shuffle=False) # Split the data. For now no validation set
+                                                    shuffle=True) # Split the data. For now no validation set
                                                                     # no random split. so shuffle = false
 # Original Data
 scale = MinMaxScaler() # Scale the data.
@@ -55,7 +55,7 @@ for j in range(1,30):
     robust_gmean = []
     robust_acc = []
     for i in range(100):
-        rf_clf = RandomForestClassifier(n_estimators=100, max_depth=j, n_jobs=-1)
+        rf_clf = RandomForestClassifier(n_estimators=50, max_depth=j, n_jobs=-1)
         rf_clf.fit(x_train_s, y_train)
         y_pred_rf = rf_clf.predict((x_test_s[x_train_s.columns]))
         acc_rf = scoring_model(y_test, y_pred_rf)
@@ -99,7 +99,7 @@ plt.plot(x_, sens100, color='r', label='sensitivity')
 plt.plot(x_, spec100, color='b', label='specificity')
 plt.plot(x_, gm100, color='g', label='gmean')
 plt.xlabel('maximum depth')
-plt.title('Number of Trees : 100')
+plt.title('Number of Trees : 10')
 plt.legend()
 plt.show()
 

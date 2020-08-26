@@ -2,7 +2,7 @@ import pandas as pd
 import timeit
 
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn import svm
 
 import matplotlib.pyplot as plt
@@ -26,7 +26,7 @@ y = wd['korclf1']
 # Create trainig set, testing set.
 x_train, x_test, y_train, y_test = train_test_split(x, y,
                                                     test_size=0.3,
-                                                    shuffle=False) # Split the data. For now no validation set
+                                                    shuffle=True) # Split the data. For now no validation set
                                                                     # no random split. so shuffle = false
 # Original Data
 scale = MinMaxScaler() # Scale the data.
@@ -48,7 +48,7 @@ x_test_s = x_test_s.set_index('Unnamed: 0') # X_test scaled and ready to go
 
 def mysvc(c, sigma, k='rbf'):
     g = 1 / (2 * sigma**2)
-    svm_clf = svm.SVC(C = c, gamma=g, kernel=k)
+    svm_clf = svm.SVC(C = c, gamma=g, kernel=k, probability=True)
     return svm_clf
 
 boostadd = list()
@@ -73,6 +73,7 @@ for c_val in [1, 50, 100]:
             cdt = [c_val, sigma_val]
             boostadd.append(cdt)
         print(f'sigma value {sigma_val} checked')
+        print(cross_val_score(m, x_train_s, y_train, cv=5, n_jobs=-1))
 
     sens[f'C = {c_val}'] = sens_sigma
     spec[f'C = {c_val}'] = spec_sigma
