@@ -8,7 +8,7 @@ class Preprocessing:
         self.df_columns = data.columns # List of columns name
         self.index = data.index
 
-    def log_return(self, lag_distance: int, column_number: int) -> pd.DataFrame:
+    def log_return(self, lag_distance: int, column_number: int, type='close to close') -> pd.DataFrame:
         """
         :param lag_distance: how much time I should go back.
         :param column_number: start from 0(just like python list indexing scheme)
@@ -19,10 +19,16 @@ class Preprocessing:
         col_num = column_number
         target = self.data[list(self.df_columns)[col_num]] # select particular column
 
-        logreturn = np.log(target) - np.log(target.shift(lag))
-        res = pd.DataFrame(logreturn, columns=[self.df_columns[col_num]])
-        return res
+        if type == 'close to close':
+            # log P_t - log P_(t-1)
+            logreturn = np.log(target) - np.log(target.shift(lag))
+            res = pd.DataFrame(logreturn, columns=[self.df_columns[col_num]])
+            return res
 
+        elif type == 'open to close':
+            # Require opening price and close price inside the data
+            ...
+            return ...
 
     def log_return_class(self, lag_distance: int, column_number: int, simplicity='-1/1') -> pd.DataFrame:
         """
@@ -35,7 +41,7 @@ class Preprocessing:
         sim = simplicity
         col_num = column_number
         lag = lag_distance
-        play = self.log_return(lag, col_num)[self.df_columns[0]]
+        play = self.log_return(lag, col_num, type='close to close')[self.df_columns[0]]
 
         if sim == '-1/1':
             resultlist = list()
