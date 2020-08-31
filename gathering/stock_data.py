@@ -124,10 +124,10 @@ countries = countries_asia + countries_eu
 tickers = tickers_asia + tickers_eu
 
 dataset = {}
-for country in range(len(countries)):
-    temp = data.DataReader(tickers[country], 'yahoo', starting_date, ending_date)
-    temp = temp['Close'].rename(columns={'Close' : countries[country]})
-    dataset[countries[country]] = temp
+for cntry in range(len(countries)):
+    temp = data.DataReader(tickers[cntry], 'yahoo', starting_date, ending_date)
+    temp = temp['Close'].rename(columns={'Close' : countries[cntry]})
+    dataset[countries[cntry]] = temp
 
 more = pd.DataFrame.from_dict(dataset)[start_date : end_date]
 asia_more = more[countries_asia]
@@ -143,11 +143,30 @@ ame_total = pd.concat([United_States, ame_additional], axis = 1)[alt_start_date:
 ame_total = ame_total.shift(1) # Since at the time of asia market closing time,
                                # we don't have the same date's closure information of America
 ame_total.to_csv(r'D:\Data\Grad\ame_total_dataset.csv')
+
 eu_total = pd.concat([eu_more, eu_additional], axis = 1)[start_date:]
+eu_total = eu_total.shift(1) # Since at the time of asia market closing time
+                             # EU market haven't closed yet
 eu_total.to_csv(r'D:\Data\Grad\eu_total_dataset.csv')
+
 asia_total = pd.concat([asia_more, asia_additional], axis = 1)[start_date:]
-asia_total.to_csv(r'D:\Data\Grad\asia_total_dataset.csv')
+
+# Asia lag - except (austl nz kor japan)
+as_total = pd.DataFrame(None)
+
+behind_kor = ['india', 'taiwan', 'phil', 'china', 'hong kong', 'indone', 'tha', 'pak', 'mal'] # UTC + 9< countries
+for cntry in behind_kor:
+    asia_ = pd.DataFrame(asia_total[cntry]).shift(1)
+    as_total = pd.concat([as_total, asia_], axis=1)
+
+front_kor = ['japan', 'kor', 'nz', 'austl'] # UTC + 9> countries
+for cntry in front_kor:
+    asia_ = pd.DataFrame(asia_total[cntry])
+    as_total = pd.concat([as_total, asia_], axis=1)
+
+print(as_total)
+as_total.to_csv(r'D:\Data\Grad\asia_total_dataset.csv')
+
 
 total_stock_index_dataset = pd.concat([ame_total, eu_total, asia_total], axis = 1)
 total_stock_index_dataset.to_csv(r'D:\Data\Grad\total_stock_index_dataset.csv')
-print(total_stock_index_dataset)
