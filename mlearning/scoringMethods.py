@@ -66,10 +66,24 @@ class scoring_model:
         self.FP = False_Positive(self.truth, self.pred)
         self.FN = False_Negative(self.truth, self.pred)
 
-    def accuracy(self) -> float:
-        accy = (self.TP + self.TN) / (self.TP + self.TN + self.FP + self.FN)
-        return accy
 
+    def accuracy(self, weight=None) -> float:
+        if weight is None:
+            accy = (self.TP + self.TN) / (self.TP + self.TN + self.FP + self.FN)
+            return accy
+
+        else:
+            t = list(self.truth)
+
+            t_c = list() # truth set's ac
+            for i in sorted(list(set(t))):
+                t_c.append(t.count(i))
+
+            weight1 = t_c[1] # total(1): assign for every true -1
+            weight2 = t_c[0] # total(-1): assign for every true 1
+
+            accy = (weight2 * self.TP + weight1 * self.TN) / (2 * ((self.TP + self.FP) * (self.TN + self.FN)))
+            return accy
 
     def sensitivity(self) -> float:
         if (self.TP + self.FN) == 0:

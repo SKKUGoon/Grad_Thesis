@@ -27,7 +27,7 @@ y = wd['korclf1']
 # Create trainig set, testing set.
 x_train, x_test, y_train, y_test = train_test_split(x, y,
                                                     test_size=0.3,
-                                                    shuffle=True) # Split the data. For now no validation set
+                                                    shuffle=False) # Split the data. For now no validation set
                                                                     # no random split. so shuffle = false
 # Original Data
 scale = MinMaxScaler() # Scale the data.
@@ -55,7 +55,7 @@ for j in range(1,30):
     robust_gmean = []
     robust_acc = []
     for i in range(100):
-        rf_clf = RandomForestClassifier(n_estimators=50, max_depth=j, n_jobs=-1)
+        rf_clf = RandomForestClassifier(n_estimators=100, max_depth=j, n_jobs=-1)
         rf_clf.fit(x_train_s, y_train)
         y_pred_rf = rf_clf.predict((x_test_s[x_train_s.columns]))
         acc_rf = scoring_model(y_test, y_pred_rf)
@@ -63,7 +63,7 @@ for j in range(1,30):
         robust_check1.append(acc_rf.sensitivity())
         robust_check2.append(acc_rf.specificity())
         robust_gmean.append(acc_rf.gmean())
-        robust_acc.append(acc_rf.accuracy())
+        robust_acc.append(acc_rf.accuracy(weight='weighted'))
     robust_sens[f'max_depth = {j}'] = robust_check1
     robust_spec[f'max_depth = {j}'] = robust_check2
     gm[f'max_depth = {j}'] = robust_gmean
@@ -104,8 +104,6 @@ plt.legend()
 plt.show()
 
 plt.plot(x_, acc100, color='c', label='accuracy')
-plt.bar(x_, acc_sd100, color='r', label='standard deviation')
-plt.plot(x_, acc_minmax100, color = 'g', label='min max difference')
 plt.plot(x_, [0.5]*29, color='b', linestyle='dashed', label='50% line')
 plt.xlabel('maximum depth')
 plt.title('Number of Trees : 100')
