@@ -16,7 +16,7 @@ import pandas as pd
 import numpy as np
 from copy import deepcopy
 
-class AdaboostES:
+class AdaboostClassifierES:
     def __init__(self, voting_clf: List, max_iter, early_stopping: bool):
         ...
         self.clfs = voting_clf
@@ -63,7 +63,6 @@ class AdaboostES:
             step_error = list()
             self.clfrs = deepcopy(self.clfs) # Every iteration needs resetting of individual voters(state of not fitted)
             for i in self.clfrs:
-                print(self.sample_weights[boost_iter])
                 # Get the classifier that has minimum training error
                 i.fit(X_train, y_train, sample_weight=self.sample_weights[boost_iter])
                 pred = i.predict(X_train)
@@ -71,7 +70,11 @@ class AdaboostES:
 
                 # sum of sample weights when the prediction is wrong
                 error = sum(c for a, b, c in zip(pred, ans, self.sample_weights[boost_iter]) if a != b)
-                step_error.append(error)
+                if error == 0:
+                    print(i, 'zero training error')
+                    pass
+                else:
+                    step_error.append(error)
 
             # Choose classifier that has minimum error
             minimum = min(step_error)
@@ -103,14 +106,18 @@ class AdaboostES:
 
         return self
 
-    def predict(self, X_test: pd.DataFrame):
+    def predict(self, X_test: pd.DataFrame, raw_result=False):
         """
         Get total prediction of AdaBoost.
         :return:
         """
         self.individual = np.array([clf.predict(X_test) for clf in self.classifier])
-        res_sign = np.sign(np.dot(self.clf_weights, self.individual))
-        return res_sign
+        if raw_result is True:
+            res = np.dot(self.clf_weights, self.individual)
+            return res
+        else:
+            res_sign = np.sign(np.dot(self.clf_weights, self.individual))
+            return res_sign
 
     def get_iter_prediction(self):
         """
@@ -118,15 +125,31 @@ class AdaboostES:
         """
         if self.individual == list():
             raise AssertionError("predict function must be executed to get iteration prediction result")
+
         return self.individual
 
+    def get_iter_classifier(self):
+        """
+        Returns the classifier used for each iteration
+        """
+        return self.classifier
+
     def get_weights(self):
+        """
+        Returns sample weights of each iteration
+        """
         return self.sample_weights
 
     def get_clf_weights(self):
+        """
+        Returns classifier weights for each iteration
+        """
         return self.clf_weights
 
-    def get_iteration_errors(self):
+    def get_iter_errors(self):
+        """
+        Returns errors made by the classifier in each iterations.
+        """
         return self.errors
 
     def _early_stopping_rules(self):
