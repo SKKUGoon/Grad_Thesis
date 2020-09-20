@@ -49,13 +49,15 @@ gm = {}
 acc = {}
 boostadd = {}
 
-for j in range(1,30):
+num_trees = 5000
+
+for j in range(1,50,2):
     robust_check1 = []
     robust_check2 = []
     robust_gmean = []
     robust_acc = []
-    for i in range(100):
-        rf_clf = RandomForestClassifier(n_estimators=100, max_depth=j, n_jobs=-1)
+    for i in range(1):
+        rf_clf = RandomForestClassifier(n_estimators=num_trees, max_depth=j, n_jobs=-1)
         rf_clf.fit(x_train_s, y_train)
         y_pred_rf = rf_clf.predict((x_test_s[x_train_s.columns]))
         acc_rf = scoring_model(y_test, y_pred_rf)
@@ -78,7 +80,7 @@ print('Final results are:\n', robust_sens, '\n', robust_spec, '\n', gm, '\n', ac
 print(boostadd.keys())
 
 # Graph drawing
-x_ = list(range(1,30))
+x_ = list(range(1,50,2))
 sens100 = list()
 spec100 = list()
 gm100 = list()
@@ -104,8 +106,8 @@ plt.legend()
 plt.show()
 
 plt.plot(x_, acc100, color='c', label='accuracy')
-plt.plot(x_, [0.5]*29, color='b', linestyle='dashed', label='50% line')
+plt.plot(x_, [0.5]*len(x_), color='b', linestyle='dashed', label='50% line')
 plt.xlabel('maximum depth')
-plt.title('Number of Trees : 100')
+plt.title(f'Number of Trees : {num_trees}')
 plt.legend()
 plt.show()

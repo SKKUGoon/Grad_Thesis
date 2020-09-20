@@ -66,7 +66,7 @@ for c_val in [1, 50, 100]:
         sens_sigma.append(t.sensitivity())
         spec_sigma.append(t.specificity())
         gm_sigma.append(t.gmean())
-        acc_sigma.append(t.accuracy())
+        acc_sigma.append(t.accuracy(weight='weighted'))
 
         # Boosting element
         if t.accuracy() >= 0.5:
