@@ -99,7 +99,7 @@ y_ls = y_test[y_test.columns[0]]
 
 a = AdaboostClassifierES(clf_ls, max_iter=100, early_stopping=False)
 
-a.fit(x_train_s, y_train)
-p2 = a.predict(x_test_s)
-b2 = scoring_model(y_ls, list(p2))
-print(b2.accuracy(weight='weighted'))
+a.stochastic_fit(x_train_s, y_train)
+p1 = a.predict(x_test_s)
+b1 = scoring_model(y_ls, list(p1))
+print(b1.accuracy(weight='weighted'))

@@ -21,6 +21,7 @@ class AdaboostClassifierES:
         ...
         self.clfs = voting_clf
         self.iter = max_iter
+        self.stochasticfit = False
 
     def _validity_check(self, X_train: pd.DataFrame, y_train:pd.DataFrame) -> List:
         """
@@ -97,12 +98,91 @@ class AdaboostClassifierES:
                 if boost_iter == (self.iter - 1): # Last iteration
                     pass
                 else:
-                    self.sample_weights[boost_iter + 1] = new_sample_weight
+                    self.sample_weights[boost_iter + 1] = new_sample_weight / sum(new_sample_weight) # to make sum(weight) = 1
 
             # Results of an iteration
             self.classifier[boost_iter] = self.clfrs[min_ind] # classifiers "fitted" results are stored
             self.clf_weights[boost_iter] = alpha_clf
             self.errors[boost_iter] = min(step_error)
+
+        return self
+
+    def stochastic_fit(self, X_train: pd.DataFrame, y_train: pd.DataFrame):
+        """
+        For m=1 to L
+        1) Fit the classifier and get the best fit(smallest training error)
+        2) Get the classifier's training error (e)
+        3) Compute weight of the classifier
+        weight = (1/2) * np.log((1-e)/e)
+        4) set new sample weight and normalize it to 1
+        """
+        #self._validity_check(X_train, y_train)
+
+        self.stochasticfit = True
+
+        # Get optimal classifier for the iteration
+        num_feat = len(X_train.columns)
+        num_data = len(X_train)
+
+        # Number of iterations are needed to proceed with data
+        self.sample_weights = np.zeros(shape=(self.iter, num_data))
+        self.classifier = np.zeros(shape=self.iter, dtype=object)
+        self.clf_weights = np.zeros(shape=self.iter)
+        self.clf_choice_weights = np.zeros(shape=(self.iter, len(self.clfs)))
+        self.errors = np.zeros(shape=self.iter)
+
+        # Set initial sample weight(all equal)
+        self.sample_weights[0] = np.ones(shape=num_data) / num_data
+
+        # Set initial class_choice weight(all equal)
+        self.clf_choice_weights[0] = np.ones(shape=len(self.clfs)) / len(self.clfs)
+
+        for boost_iter in range(self.iter):
+            # Calculate errors for each candidate classifier
+            clfrs = self.clfs # Every iteration needs resetting of individual voters(state of not fitted)
+            # Choose classifier randomly
+            clfrs = np.array(clfrs)
+            ind = np.random.choice(len(self.clfs), p = self.clf_choice_weights[boost_iter])
+
+            iterclf = clfrs[ind]
+            iterclf.fit(X_train, y_train, sample_weight=self.sample_weights[boost_iter])
+            pred = iterclf.predict(X_train)
+            ans = list(y_train[y_train.columns[0]]) # pd.DataFrame to List object
+
+            # sum of sample weights when the prediction is wrong
+            error = sum(c for a, b, c in zip(pred, ans, self.sample_weights[boost_iter]) if a != b)
+            if error == 0:
+                print(iterclf, 'zero training error')
+                break
+                pass
+
+            # Calculate classifier weight
+            alpha_clf = (1/2) * np.log((1 - error)/error)
+
+            # Calculate updated sample
+            new_sample_weight = self.sample_weights[boost_iter] * np.exp(-1 * alpha_clf * np.array(pred) * np.array(ans))
+            if boost_iter < self.iter:
+                if boost_iter == (self.iter - 1): # Last iteration
+                    pass
+                else:
+                    self.sample_weights[boost_iter + 1] = new_sample_weight / sum(new_sample_weight) # to make sum(weight) = 1
+
+            # Calculate updated classifier choice weight
+            # find the location of the classifier & put the weight there
+
+            new_clf_choice = self.clf_choice_weights[boost_iter]
+            new_clf_choice[ind] = new_clf_choice[ind] * np.exp(-1 * alpha_clf * 0.1)
+            if boost_iter < self.iter:
+                if boost_iter == (self.iter - 1): # Last iteration
+                    pass
+                else:
+                    self.clf_choice_weights[boost_iter + 1] = new_clf_choice / sum(new_clf_choice) # to make sum(weight) = 1
+
+            # Results of an iteration
+            self.classifier[boost_iter] = iterclf # classifiers "fitted" results are stored
+            self.clf_weights[boost_iter] = alpha_clf
+            self.errors[boost_iter] = error
+            print(f'{boost_iter+1} done')
 
         return self
 
@@ -127,6 +207,23 @@ class AdaboostClassifierES:
             raise AssertionError("predict function must be executed to get iteration prediction result")
 
         return self.individual
+
+    def get_iter_cumul_prediction(self):
+        """
+        Returns the prediction each iteration. In a cumulative manner
+        """
+        if self.individual == list():
+            raise AssertionError("predict function must be executed to get iteration prediction result")
+
+        res = list()
+        for i in range(1, len(self.individual)):
+            r = np.sign(np.dot(self.clf_weights[0:i], self.individual[0:i]))
+            res.append(r)
+        return res
+
+    def get_classifier_choice_weight(self):
+        if self.stochasticfit is True:
+            return self.clf_choice_weights
 
     def get_iter_classifier(self):
         """
