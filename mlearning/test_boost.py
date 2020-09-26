@@ -79,9 +79,9 @@ dt6 = DecisionTreeClassifier(max_depth=25, random_state=42) # Not Random
 rf1 = RandomForestClassifier(n_estimators=1000, max_depth=2, n_jobs=-1, random_state=42)
 rf2 = RandomForestClassifier(n_estimators=1000, max_depth=5, n_jobs=-1, random_state=42)
 rf3 = RandomForestClassifier(n_estimators=1000, max_depth=10, n_jobs=-1, random_state=42)
-rf4 = RandomForestClassifier(n_estimators=1000, max_depth=15, n_jobs=-1, random_state=42)
-rf5 = RandomForestClassifier(n_estimators=1000, max_depth=20, n_jobs=-1, random_state=42)
-rf6 = RandomForestClassifier(n_estimators=1000, max_depth=25, n_jobs=-1, random_state=42)
+rf4 = RandomForestClassifier(n_estimators=500, max_depth=2, n_jobs=-1, random_state=42)
+rf5 = RandomForestClassifier(n_estimators=500, max_depth=5, n_jobs=-1, random_state=42)
+rf6 = RandomForestClassifier(n_estimators=500, max_depth=10, n_jobs=-1, random_state=42)
 
 n1 = KerasClassifier(build_fn=nn1, epochs=50, verbose=0)
 n2 = KerasClassifier(build_fn=nn1, epochs=100, verbose=0)
@@ -90,8 +90,7 @@ n4 = KerasClassifier(build_fn=nn2, epochs=50, verbose=0)
 n5 = KerasClassifier(build_fn=nn2, epochs=100, verbose=0)
 n6 = KerasClassifier(build_fn=nn2, epochs=150, verbose=0)
 
-clf_ls =[dt1, dt2, dt3, dt4, dt5, dt6,
-         rf1, rf2, rf3, rf4, rf5, rf6]
+clf_ls =[dt1, dt2, dt3, dt4, dt5, dt6]
 
 y_train = pd.DataFrame(y_train)
 y_test = pd.DataFrame(y_test)

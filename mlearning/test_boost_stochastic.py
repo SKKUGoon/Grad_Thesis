@@ -79,9 +79,9 @@ dt6 = DecisionTreeClassifier(max_depth=25, random_state=42) # Not Random
 rf1 = RandomForestClassifier(n_estimators=1000, max_depth=2, n_jobs=-1, random_state=42)
 rf2 = RandomForestClassifier(n_estimators=1000, max_depth=5, n_jobs=-1, random_state=42)
 rf3 = RandomForestClassifier(n_estimators=1000, max_depth=10, n_jobs=-1, random_state=42)
-rf4 = RandomForestClassifier(n_estimators=1000, max_depth=15, n_jobs=-1, random_state=42)
-rf5 = RandomForestClassifier(n_estimators=1000, max_depth=20, n_jobs=-1, random_state=42)
-rf6 = RandomForestClassifier(n_estimators=1000, max_depth=25, n_jobs=-1, random_state=42)
+rf4 = RandomForestClassifier(n_estimators=500, max_depth=2, n_jobs=-1, random_state=42)
+rf5 = RandomForestClassifier(n_estimators=500, max_depth=5, n_jobs=-1, random_state=42)
+rf6 = RandomForestClassifier(n_estimators=500, max_depth=10, n_jobs=-1, random_state=42)
 
 n1 = KerasClassifier(build_fn=nn1, epochs=50, verbose=0)
 n2 = KerasClassifier(build_fn=nn1, epochs=100, verbose=0)
@@ -97,9 +97,14 @@ y_train = pd.DataFrame(y_train)
 y_test = pd.DataFrame(y_test)
 y_ls = y_test[y_test.columns[0]]
 
-a = AdaboostClassifierES(clf_ls, max_iter=100, early_stopping=False)
+res = list()
+for i in range(100):
+    a = AdaboostClassifierES(clf_ls, max_iter=100, early_stopping=False)
 
-a.stochastic_fit(x_train_s, y_train)
-p1 = a.predict(x_test_s)
-b1 = scoring_model(y_ls, list(p1))
-print(b1.accuracy(weight='weighted'))
+    a.stochastic_fit(x_train_s, y_train)
+    p1 = a.predict(x_test_s)
+    b1 = scoring_model(y_ls, list(p1))
+    acc = b1.accuracy(weight='weighted')
+    res.append(acc)
+
+print(np.mean(res))

@@ -139,7 +139,7 @@ class AdaboostClassifierES:
 
         for boost_iter in range(self.iter):
             # Calculate errors for each candidate classifier
-            clfrs = self.clfs # Every iteration needs resetting of individual voters(state of not fitted)
+            clfrs = deepcopy(self.clfs) # Every iteration needs resetting of individual voters(state of not fitted)
             # Choose classifier randomly
             clfrs = np.array(clfrs)
             ind = np.random.choice(len(self.clfs), p = self.clf_choice_weights[boost_iter])
@@ -153,8 +153,7 @@ class AdaboostClassifierES:
             error = sum(c for a, b, c in zip(pred, ans, self.sample_weights[boost_iter]) if a != b)
             if error == 0:
                 print(iterclf, 'zero training error')
-                break
-                pass
+                return self
 
             # Calculate classifier weight
             alpha_clf = (1/2) * np.log((1 - error)/error)
@@ -191,12 +190,12 @@ class AdaboostClassifierES:
         Get total prediction of AdaBoost.
         :return:
         """
-        self.individual = np.array([clf.predict(X_test) for clf in self.classifier])
+        self.individual = np.array([clf.predict(X_test) for clf in self.classifier[self.classifier != 0]])
         if raw_result is True:
-            res = np.dot(self.clf_weights, self.individual)
+            res = np.dot(self.clf_weights[self.clf_weights!=0], self.individual)
             return res
         else:
-            res_sign = np.sign(np.dot(self.clf_weights, self.individual))
+            res_sign = np.sign(np.dot(self.clf_weights[self.clf_weights!=0], self.individual))
             return res_sign
 
     def get_iter_prediction(self):
