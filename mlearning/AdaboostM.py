@@ -46,6 +46,9 @@ class AdaboostClassifierES:
         """
         self._validity_check(X_train, y_train)
 
+        X_train_np = X_train.to_numpy()
+        y_train_np = y_train.to_numpy()
+
         # Get optimal classifier for the iteration
         num_feat = len(X_train.columns)
         num_data = len(X_train)
@@ -65,8 +68,8 @@ class AdaboostClassifierES:
             self.clfrs = deepcopy(self.clfs) # Every iteration needs resetting of individual voters(state of not fitted)
             for i in self.clfrs:
                 # Get the classifier that has minimum training error
-                i.fit(X_train, y_train, sample_weight=self.sample_weights[boost_iter])
-                pred = i.predict(X_train)
+                i.fit(X_train_np, y_train_np, sample_weight=self.sample_weights[boost_iter])
+                pred = i.predict(X_train_np)
                 ans = list(y_train[y_train.columns[0]]) # pd.DataFrame to List object
 
                 # sum of sample weights when the prediction is wrong
@@ -86,14 +89,18 @@ class AdaboostClassifierES:
 
             # Fitting the classifier that has miminum error
             # Classifiers are already fitted. Therefore there are no need to re-fit it with training data.
-            pred = self.clfrs[min_ind].predict(X_train)
+            pred = self.clfrs[min_ind].predict(X_train_np)
             ans = list(y_train[y_train.columns[0]])
 
             # Calculate classifier weight
             alpha_clf = (1/2) * np.log((1 - minimum)/minimum)
 
             # Calculate updated sample
-            new_sample_weight = self.sample_weights[boost_iter] * np.exp(-1 * alpha_clf * np.array(pred) * np.array(ans))
+            new_sample_weight = self.sample_weights[boost_iter] * np.exp(-1 * alpha_clf * np.array(pred).transpose() * np.array(ans))
+
+            if len(new_sample_weight) == 1: # Goonsik Debugging
+                new_sample_weight = new_sample_weight[0]
+
             if boost_iter < self.iter:
                 if boost_iter == (self.iter - 1): # Last iteration
                     pass
@@ -116,7 +123,10 @@ class AdaboostClassifierES:
         weight = (1/2) * np.log((1-e)/e)
         4) set new sample weight and normalize it to 1
         """
-        #self._validity_check(X_train, y_train)
+        self._validity_check(X_train, y_train)
+
+        X_train_np = X_train.to_numpy()
+        y_train_np = y_train.to_numpy()
 
         self.stochasticfit = True
 
@@ -145,8 +155,8 @@ class AdaboostClassifierES:
             ind = np.random.choice(len(self.clfs), p = self.clf_choice_weights[boost_iter])
 
             iterclf = clfrs[ind]
-            iterclf.fit(X_train, y_train, sample_weight=self.sample_weights[boost_iter])
-            pred = iterclf.predict(X_train)
+            iterclf.fit(X_train_np, y_train_np, sample_weight=self.sample_weights[boost_iter])
+            pred = iterclf.predict(X_train_np)
             ans = list(y_train[y_train.columns[0]]) # pd.DataFrame to List object
 
             # sum of sample weights when the prediction is wrong
@@ -159,23 +169,27 @@ class AdaboostClassifierES:
             alpha_clf = (1/2) * np.log((1 - error)/error)
 
             # Calculate updated sample
-            new_sample_weight = self.sample_weights[boost_iter] * np.exp(-1 * alpha_clf * np.array(pred) * np.array(ans))
+            new_sample_weight = self.sample_weights[boost_iter] * np.exp(-1 * alpha_clf * np.array(pred).transpose() * np.array(ans))
+
+            if len(new_sample_weight) == 1:  # Goonsik Debugging
+                new_sample_weight = new_sample_weight[0]
+
             if boost_iter < self.iter:
-                if boost_iter == (self.iter - 1): # Last iteration
+                if boost_iter == (self.iter - 1):  # Last iteration
                     pass
                 else:
-                    self.sample_weights[boost_iter + 1] = new_sample_weight / sum(new_sample_weight) # to make sum(weight) = 1
-
+                    self.sample_weights[boost_iter + 1] = new_sample_weight / sum(new_sample_weight)  # to make sum(weight) = 1
             # Calculate updated classifier choice weight
             # find the location of the classifier & put the weight there
 
-            new_clf_choice = self.clf_choice_weights[boost_iter]
-            new_clf_choice[ind] = new_clf_choice[ind] * np.exp(-1 * alpha_clf * 0.1)
+            new_clf_choice = deepcopy(self.clf_choice_weights[boost_iter])
+            new_clf_choice[ind] = new_clf_choice[ind] * np.exp(-1 * alpha_clf)
             if boost_iter < self.iter:
-                if boost_iter == (self.iter - 1): # Last iteration
+                if boost_iter == (self.iter - 1):
                     pass
                 else:
                     self.clf_choice_weights[boost_iter + 1] = new_clf_choice / sum(new_clf_choice) # to make sum(weight) = 1
+
 
             # Results of an iteration
             self.classifier[boost_iter] = iterclf # classifiers "fitted" results are stored
@@ -190,12 +204,23 @@ class AdaboostClassifierES:
         Get total prediction of AdaBoost.
         :return:
         """
-        self.individual = np.array([clf.predict(X_test) for clf in self.classifier[self.classifier != 0]])
+        X_test_np = X_test.to_numpy()
+        self.individual = [clf.predict(X_test_np) for clf in self.classifier[self.classifier != 0]]
+        idvdl = list()
+        for pdt in self.individual: # Goonsik Debug
+            if pdt.shape == (len(X_test),):
+                idvdl.append(pdt)
+            else:
+                pdt = pdt.transpose()[0]
+                idvdl.append(pdt)
+        self.individual = np.array(idvdl)
+
         if raw_result is True:
-            res = np.dot(self.clf_weights[self.clf_weights!=0], self.individual)
-            return res
+            res = [w * prd for w, prd in zip(self.clf_weights, self.individual)]
+            return sum(res)
         else:
-            res_sign = np.sign(np.dot(self.clf_weights[self.clf_weights!=0], self.individual))
+            res = [w * prd for w, prd in zip(self.clf_weights, self.individual)]
+            res_sign = np.sign(sum(res))
             return res_sign
 
     def get_iter_prediction(self):

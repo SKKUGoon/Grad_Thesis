@@ -16,6 +16,8 @@ from mlearning.AdaboostM import AdaboostClassifierES
 import tensorflow as tf
 from tensorflow.keras.wrappers.scikit_learn import KerasClassifier
 
+import time
+
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -70,11 +72,11 @@ x_test_s = x_test_s.set_index('Unnamed: 0') # X_test scaled and ready to go
 
 # Voting Classifier
 dt1 = DecisionTreeClassifier(max_depth=2, random_state=42) # Not Random
-dt2 = DecisionTreeClassifier(max_depth=5, random_state=42) # Not Random
-dt3 = DecisionTreeClassifier(max_depth=10, random_state=42) # Not Random
-dt4 = DecisionTreeClassifier(max_depth=15, random_state=42) # Not Random
-dt5 = DecisionTreeClassifier(max_depth=20, random_state=42) # Not Random
-dt6 = DecisionTreeClassifier(max_depth=25, random_state=42) # Not Random
+dt2 = DecisionTreeClassifier(max_depth=4, random_state=42) # Not Random
+dt3 = DecisionTreeClassifier(max_depth=6, random_state=42) # Not Random
+dt4 = DecisionTreeClassifier(max_depth=8, random_state=42) # Not Random
+dt5 = DecisionTreeClassifier(max_depth=10, random_state=42) # Not Random
+dt6 = DecisionTreeClassifier(max_depth=12, random_state=42) # Not Random
 
 rf1 = RandomForestClassifier(n_estimators=1000, max_depth=2, n_jobs=-1, random_state=42)
 rf2 = RandomForestClassifier(n_estimators=1000, max_depth=5, n_jobs=-1, random_state=42)
@@ -89,16 +91,27 @@ n3 = KerasClassifier(build_fn=nn1, epochs=150, verbose=0)
 n4 = KerasClassifier(build_fn=nn2, epochs=50, verbose=0)
 n5 = KerasClassifier(build_fn=nn2, epochs=100, verbose=0)
 n6 = KerasClassifier(build_fn=nn2, epochs=150, verbose=0)
-
-clf_ls =[dt1, dt2, dt3, dt4, dt5, dt6]
+#dt1, dt2, dt3, dt4, dt5, dt6, rf1, rf2, rf3, rf4, rf5, rf6, n1, n2, n3, n4, n5, n6
+clf_ls =[dt1, dt2, dt3, dt4, dt5, dt6, rf1, rf2, rf3, rf4, rf5, rf6, n1, n2, n3, n4, n5, n6]
 
 y_train = pd.DataFrame(y_train)
 y_test = pd.DataFrame(y_test)
 y_ls = y_test[y_test.columns[0]]
 
-a = AdaboostClassifierES(clf_ls, max_iter=100, early_stopping=False)
+#a = AdaboostClassifierES(clf_ls, max_iter=10, early_stopping=False)
+#start_time = time.time()
+#a.fit(x_train_s, y_train)
+#end_time = time.time()
+#p2 = a.predict(x_test_s)
+#b2 = scoring_model(y_ls, list(p2))
+#print(b2.accuracy(weight='weighted'))
+#print(end_time - start_time)
 
-a.fit(x_train_s, y_train)
-p2 = a.predict(x_test_s)
-b2 = scoring_model(y_ls, list(p2))
-print(b2.accuracy(weight='weighted'))
+b = AdaboostClassifierES(clf_ls, max_iter=100, early_stopping=False)
+start_time = time.time()
+b.stochastic_fit(x_train_s, y_train)
+end_time = time.time()
+p3 = b.predict(x_test_s)
+b3 = scoring_model(y_ls, list(p3))
+print(b3.accuracy(weight='weighted'))
+print(end_time - start_time)
