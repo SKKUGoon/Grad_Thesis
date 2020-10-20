@@ -66,12 +66,24 @@ wd.index = pd.to_datetime(wd.index)
 x = wd[wd.columns[1:]]
 y = wd['korclf1']
 
+not_rt, is_rt = [[] for _ in range(2)]
 
+for i in x.columns:
+    if 'rt' in i or 'clf' in i or 'lag' in i:
+        is_rt.append(i)
+    elif 'rt' not in i:
+        not_rt.append(i)
+    else:
+        raise ValueError
+
+x[not_rt] = (x[not_rt] - x[not_rt].shift(1)) / x[not_rt].shift(1)
+x = x[1:]  # Since we imposed 1 day log return
+y = y[1:]
 # Create trainig set, testing set.
 x_train, x_test, y_train, y_test = train_test_split(x, y,
                                                     test_size=0.3,
-                                                    shuffle=False) # Split the data. For now no validation set
-                                                                    # no random split. so shuffle = false
+                                                    shuffle=False)  # Split the data. For now no validation set
+
 # Original Data
 scale = StandardScaler() # Scale the data.
 scale.fit(x_train)
@@ -148,27 +160,27 @@ y_ls = y_test[y_test.columns[0]]
 #print(b2.accuracy(weight='weighted'))
 #print(end_time - start_time)
 
-#b = AdaboostClassifierES(clf_ls, max_iter=150, early_stopping=False)
-#start_time = time.time()
-#b.stochastic_fit(x_train_s, y_train)
-#end_time = time.time()
-#p3 = b.predict(x_test_s)
-#b3 = scoring_model(y_ls, list(p3))
-#print(b3.accuracy(weight='weighted'))
-#print(end_time - start_time)
+b = AdaboostClassifierES(clf_ls, max_iter=150, early_stopping=False)
+start_time = time.time()
+b.stochastic_fit(x_train_s, y_train)
+end_time = time.time()
+p3 = b.predict(x_test_s)
+b3 = scoring_model(y_ls, list(p3))
+print(b3.accuracy(weight='weighted'))
+print(end_time - start_time)
 
 # Rolling Forecast
-c = AdaboostClassifierES(clf_ls, max_iter=10, early_stopping=False)
+c = AdaboostClassifierES(clf_ls, max_iter=100, early_stopping=False)
 c.stochastic_fit(x_train_s, y_train)
 
-refit = 5  # Refit after a week
+refit = 30  # Refit after a month
 it = len(x_test_s)//refit + (len(x_test_s) % refit != 0)
 
 pr = list()
 iter_ = 1
 for i in range(it):
     # Prediction
-    p4 = c.predict(x_test_s[0:refit])
+    p4 = c.predict(x_test_s[refit*(iter_-1) : refit*iter_])
     pr.append(p4)
 
     # Remake training set for x and y
