@@ -3,6 +3,7 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn import svm
 
@@ -17,6 +18,7 @@ import tensorflow as tf
 from tensorflow.keras.wrappers.scikit_learn import KerasClassifier
 
 import time
+import copy
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -76,9 +78,16 @@ for i in x.columns:
     else:
         raise ValueError
 
+x_org_not_rt = copy.deepcopy(x[not_rt])
+col = dict()
+for i in x_org_not_rt.columns:
+    col[i] = i + '_original'
+x_org_not_rt = x_org_not_rt.rename(columns=col)
 x[not_rt] = (x[not_rt] - x[not_rt].shift(1)) / x[not_rt].shift(1)
+x = pd.concat([x_org_not_rt, x], axis=1)
 x = x[1:]  # Since we imposed 1 day log return
 y = y[1:]
+
 # Create trainig set, testing set.
 x_train, x_test, y_train, y_test = train_test_split(x, y,
                                                     test_size=0.3,
@@ -143,9 +152,11 @@ n10 = KerasClassifier(build_fn=nn3, epochs=100, verbose=0)
 n11 = KerasClassifier(build_fn=nn3, epochs=150, verbose=0)
 n12 = KerasClassifier(build_fn=nn3, epochs=200, verbose=0)
 
+svc = SVC(gamma='auto')
+
 clf_ls =[dt1, dt2, dt3, dt4, dt5, dt6, dt7, dt8, dt9, dt10, dt11,
          rf1, rf2, rf3, rf4, rf5, rf6, rf7, rf8, rf9, rf10, rf11, rf12, rf13, rf14, rf15, rf16, rf17, rf18,
-         n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12]
+         n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, svc]
 
 y_train = pd.DataFrame(y_train)
 y_test = pd.DataFrame(y_test)
@@ -166,7 +177,8 @@ b.stochastic_fit(x_train_s, y_train)
 end_time = time.time()
 p3 = b.predict(x_test_s)
 b3 = scoring_model(y_ls, list(p3))
-print(b3.accuracy(weight='weighted'))
+b3acc = b3.accuracy(weight='weighted')
+print(b3acc)
 print(end_time - start_time)
 
 # Rolling Forecast
