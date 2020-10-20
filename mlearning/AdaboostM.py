@@ -183,7 +183,8 @@ class AdaboostClassifierES:
             # find the location of the classifier & put the weight there
 
             new_clf_choice = deepcopy(self.clf_choice_weights[boost_iter])
-            new_clf_choice[ind] = new_clf_choice[ind] * np.exp(-1 * alpha_clf)
+            tau = boost_iter
+            new_clf_choice[ind] = new_clf_choice[ind] * np.exp(0.5 * np.exp(-0.1 * tau) * alpha_clf)
             if boost_iter < self.iter:
                 if boost_iter == (self.iter - 1):
                     pass

@@ -43,18 +43,11 @@ x_train_s = x_train_s.set_index('Unnamed: 0')
 x_test_s = x_test_s.set_index('Unnamed: 0') # X_test scaled and ready to go
 
 # Model _ Random Forest
-robust_sens = {}
-robust_spec = {}
-gm = {}
 acc = {}
-boostadd = {}
 
-num_trees = 5000
+num_trees = 1000
 
 for j in range(1,50,2):
-    robust_check1 = []
-    robust_check2 = []
-    robust_gmean = []
     robust_acc = []
     for i in range(1):
         rf_clf = RandomForestClassifier(n_estimators=num_trees, max_depth=j, n_jobs=-1)
@@ -62,50 +55,18 @@ for j in range(1,50,2):
         y_pred_rf = rf_clf.predict((x_test_s[x_train_s.columns]))
         acc_rf = scoring_model(y_test, y_pred_rf)
 
-        robust_check1.append(acc_rf.sensitivity())
-        robust_check2.append(acc_rf.specificity())
-        robust_gmean.append(acc_rf.gmean())
         robust_acc.append(acc_rf.accuracy(weight='weighted'))
-    robust_sens[f'max_depth = {j}'] = robust_check1
-    robust_spec[f'max_depth = {j}'] = robust_check2
-    gm[f'max_depth = {j}'] = robust_gmean
     acc[f'max_depth = {j}'] = robust_acc
-    if min(robust_acc) > 0.5:
-        boostadd[f'max_depth = {j}'] = robust_acc
     print(f'max_depth {j} checked')
 
 
 
-print('Final results are:\n', robust_sens, '\n', robust_spec, '\n', gm, '\n', acc)
-print(boostadd.keys())
+print(f'Final results are:{acc}')
 
 # Graph drawing
 x_ = list(range(1,50,2))
-sens100 = list()
-spec100 = list()
-gm100 = list()
-acc100 = list()
-acc_sd100 = list()
-acc_minmax100 = list()
 
-for i in range(29):
-    sens100.append(np.mean(list(robust_sens.values())[i]))
-    spec100.append(np.mean(list(robust_spec.values())[i]))
-    gm100.append(np.mean(list(gm.values())[i]))
-    acc100.append(np.mean(list(acc.values())[i]))
-    acc_sd100.append(np.var(list(acc.values())[i]))
-    acc_minmax100.append(max(list(acc.values())[i]) - min(list(acc.values())[i]))
-
-
-plt.plot(x_, sens100, color='r', label='sensitivity')
-plt.plot(x_, spec100, color='b', label='specificity')
-plt.plot(x_, gm100, color='g', label='gmean')
-plt.xlabel('maximum depth')
-plt.title('Number of Trees : 10')
-plt.legend()
-plt.show()
-
-plt.plot(x_, acc100, color='c', label='accuracy')
+plt.plot(x_, list(acc.values()), color='b', label='accuracy')
 plt.plot(x_, [0.5]*len(x_), color='b', linestyle='dashed', label='50% line')
 plt.xlabel('maximum depth')
 plt.title(f'Number of Trees : {num_trees}')
