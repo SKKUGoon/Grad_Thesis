@@ -154,24 +154,33 @@ n12 = KerasClassifier(build_fn=nn3, epochs=200, verbose=0)
 
 svc = SVC(gamma='auto')
 
-clf_ls =[dt1, dt2, dt3, dt4, dt5, dt6, dt7, dt8, dt9, dt10, dt11,
-         rf1, rf2, rf3, rf4, rf5, rf6, rf7, rf8, rf9, rf10, rf11, rf12, rf13, rf14, rf15, rf16, rf17, rf18,
-         n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, svc]
+#clf_ls =[dt1, dt2, dt3, dt4, dt5, dt6, dt7, dt8, dt9, dt10, dt11,
+#         rf1, rf2, rf3, rf4, rf5, rf6, rf7, rf8, rf9, rf10, rf11, rf12, rf13, rf14, rf15, rf16, rf17, rf18,
+#         n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, svc]
+
+#clf_ls =[dt1, dt3, dt5, dt7, dt9, dt11,
+#         rf1, rf3, rf5, rf7, rf9, rf11, rf13, rf15, rf17,
+#         n1, n3, n5, n7, n9, n11, svc]
+
+clf_ls =[dt1, dt5, dt9,
+         rf1, rf5, rf9, rf13, rf17,
+         n1, n5, n9, svc]
+
 
 y_train = pd.DataFrame(y_train)
 y_test = pd.DataFrame(y_test)
 y_ls = y_test[y_test.columns[0]]
 
-#a = AdaboostClassifierES(clf_ls, max_iter=10, early_stopping=False)
-#start_time = time.time()
-#a.fit(x_train_s, y_train)
-#end_time = time.time()
-#p2 = a.predict(x_test_s)
-#b2 = scoring_model(y_ls, list(p2))
-#print(b2.accuracy(weight='weighted'))
-#print(end_time - start_time)
+a = AdaboostClassifierES(clf_ls, max_iter=50, early_stopping=False)
+start_time = time.time()
+a.fit(x_train_s, y_train)
+end_time = time.time()
+p2 = a.predict(x_test_s)
+b2 = scoring_model(y_ls, list(p2))
+print(b2.accuracy(weight='weighted'))
+print(end_time - start_time)
 
-b = AdaboostClassifierES(clf_ls, max_iter=150, early_stopping=False)
+b = AdaboostClassifierES(clf_ls, max_iter=50, early_stopping=False)
 start_time = time.time()
 b.stochastic_fit(x_train_s, y_train)
 end_time = time.time()
@@ -182,7 +191,7 @@ print(b3acc)
 print(end_time - start_time)
 
 # Rolling Forecast
-c = AdaboostClassifierES(clf_ls, max_iter=100, early_stopping=False)
+c = AdaboostClassifierES(clf_ls, max_iter=50, early_stopping=False)
 c.stochastic_fit(x_train_s, y_train)
 
 refit = 30  # Refit after a month
@@ -202,6 +211,6 @@ for i in range(it):
     iter_ += 1
 
     # Reset the Model
-    c = AdaboostClassifierES(clf_ls, max_iter=10, early_stopping=False)
+    c = AdaboostClassifierES(clf_ls, max_iter=50, early_stopping=False)
     c.stochastic_fit(x_tr, y_tr)
     print(f'{i+1}/{it}')
