@@ -37,6 +37,8 @@ test_df = test_df.replace([np.inf, -np.inf], np.nan)
 test_df = test_df.fillna(method='ffill')
 test_df = test_df.dropna(axis='columns')  # Original Dataset without the lagged variable has 192 columns
 
+# Starting Date from (2014, 1, 3) to ending date of (2020, 5, 1)
+
 def create_diff(dataframe_:pd.DataFrame, diff_:int) -> pd.DataFrame:
     cols = dataframe_.columns
     y_name = 'korclf1'
