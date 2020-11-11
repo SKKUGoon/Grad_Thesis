@@ -171,24 +171,24 @@ y_train = pd.DataFrame(y_train)
 y_test = pd.DataFrame(y_test)
 y_ls = y_test[y_test.columns[0]]
 
-a = AdaboostClassifierES(clf_ls, max_iter=50, early_stopping=False)
-start_time = time.time()
-a.fit(x_train_s, y_train)
-end_time = time.time()
-p2 = a.predict(x_test_s)
-b2 = scoring_model(y_ls, list(p2))
-print(b2.accuracy(weight='weighted'))
-print(end_time - start_time)
+#a = AdaboostClassifierES(clf_ls, max_iter=50, early_stopping=False)
+#start_time = time.time()
+#a.fit(x_train_s, y_train)
+#end_time = time.time()
+#p2 = a.predict(x_test_s)
+#b2 = scoring_model(y_ls, list(p2))
+#print(b2.accuracy(weight='weighted'))
+#print(end_time - start_time)
 
-b = AdaboostClassifierES(clf_ls, max_iter=50, early_stopping=False)
-start_time = time.time()
-b.stochastic_fit(x_train_s, y_train)
-end_time = time.time()
-p3 = b.predict(x_test_s)
-b3 = scoring_model(y_ls, list(p3))
-b3acc = b3.accuracy(weight='weighted')
-print(b3acc)
-print(end_time - start_time)
+#b = AdaboostClassifierES(clf_ls, max_iter=50, early_stopping=False)
+#start_time = time.time()
+#b.stochastic_fit(x_train_s, y_train)
+#end_time = time.time()
+#p3 = b.predict(x_test_s)
+#b3 = scoring_model(y_ls, list(p3))
+#b3acc = b3.accuracy(weight='weighted')
+#print(b3acc)
+#print(end_time - start_time)
 
 # Rolling Forecast
 c = AdaboostClassifierES(clf_ls, max_iter=50, early_stopping=False)
@@ -199,7 +199,7 @@ it = len(x_test_s)//refit + (len(x_test_s) % refit != 0)
 
 pr = list()
 iter_ = 1
-for i in range(it):
+for i in range(3):
     # Prediction
     p4 = c.predict(x_test_s[refit*(iter_-1) : refit*iter_])
     pr.append(p4)

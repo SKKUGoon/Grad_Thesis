@@ -44,13 +44,14 @@ data3 = pd.read_csv(r"D:\Data\Grad\bonds_dataset.csv") # Raw bond data
 data4 = pd.read_csv(r"D:\Data\Grad\total_stock_index_dataset.csv") # Raw stock data (not return)
 data_kor = pd.read_csv(r"D:\Data\Grad\Kor_log_ret_class_lag1.csv") # Korea classified Data
 data_volume = pd.read_csv(r'D:\Data\Grad\Kospi_volume.csv')
+data_kospi50 = pd.read_csv(r'D:\Data\Grad\individual_stock_dataset.csv')
 
 use = ['data1', 'data2', 'data3', 'data4',
-       'data_kor', 'data_volume']
+       'data_kor', 'data_volume', 'data_kospi50']
 using = [data1, data2, data3, data4,
-         data_kor, data_volume]
+         data_kor, data_volume, data_kospi50]
 type_ = ['Continuous_no_future', 'Continuous_no_future', 'Continuous_no_future', 'Continuous_no_future',
-         'Discrete', 'Continuous_no_future']
+         'Discrete', 'Continuous_no_future', 'Continuous_no_future']
 
 for i in range(len(using)):
     using[i] = refurbish_dataframe(using[i], nan_option=type_[i], lag_option=0)
@@ -74,24 +75,32 @@ for i in range(len(lagged_data.keys())):
     lag_temp = pd.concat([lag_temp, lagged_data[keyvalue[i]]], axis=1)
 
 # Create log returns for stock indexes(over a day)
-ln_d4 = np.log(using[3]) - np.log(using[3].shift(7))
-ln_d4 = renamecolumns(ln_d4, '7dayrt')
+ln_d4 = np.log(using[3]) - np.log(using[3].shift(1))
+ln_d4 = renamecolumns(ln_d4, '1dayrt')
 lnsq_d4 = ln_d4 ** 2 # sqrd to take in the effect of return-volatility
-lnsq_d4 = renamecolumns(lnsq_d4, '7dayvol')
+lnsq_d4 = renamecolumns(lnsq_d4, '1dayvol')
+
+ln_kospi50 = np.log(using[6]) - np.log(using[6].shift(1))
+ln_kospi50 = renamecolumns(ln_kospi50, '1dayrt')
+lnsq_kospi50 = ln_kospi50 ** 2
+lnsq_kospi50 = renamecolumns(lnsq_kospi50, '1dayvol')
+
 # Cut data
-s = '2001-12-06'
+s = '2011-12-06'
 sd = datetime.date(2001, 12, 6)
 e = '2020-05-14'
 ed = datetime.date(2020, 5, 15)
 
 fwd = pd.concat([using[4].shift(-1), # using[4] and contains dependent data.
                  using[0], using[1], using[2], using[3],
-                 using[5], lag_temp, lnsq_d4.shift(1), ln_d4.shift(1)], axis=1)
+                 using[5], using[6], lag_temp,
+                 lnsq_d4.shift(1), ln_d4.shift(1), lnsq_kospi50, ln_kospi50], axis=1)
 
 fwd = fwd[s : e]
 # U.S 1Y 10Y Japan 1Y 10Y has nans.
 # nz has inf when taken log
 # Delete them for now
+fwd = fwd.fillna(method='ffill')
 fwd = fwd.replace([np.inf, -np.inf, 0], np.nan)
 fwd = fwd.dropna(axis='columns')
 fwd.to_csv(r'D:\Data\Grad\test_Work_Data_w_lag.csv', index=True)
