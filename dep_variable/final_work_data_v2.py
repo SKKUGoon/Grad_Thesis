@@ -55,5 +55,5 @@ dff3 = create_diff(test_df, 30)
 
 fwd = pd.concat([test_df, dff1, dff2, dff3], axis=1)
 fwd = fwd.dropna(axis='rows')
-print(fwd
+print(fwd)
 fwd.to_pickle(r'.\fwd.pkl')
