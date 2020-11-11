@@ -4,6 +4,7 @@ import numpy as np
 import datetime
 import pickle
 
+
 def set_date_index(dataframe_:pd.DataFrame, date_col_loc=0) -> pd.DataFrame:
     day = dataframe_.columns[date_col_loc]
     dataframe_ = dataframe_.set_index(dataframe_[day])
