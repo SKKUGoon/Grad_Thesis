@@ -47,7 +47,7 @@ def False_Negative(truth, pred):
             pass
     return FN
 
-class scoring_model:
+class ScoringModel:
     def __init__(self, true_data: List, test_data: List):
         """Data is pandas core Series
         positive data has a value of 1, and negative data has a value of -1"""

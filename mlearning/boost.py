@@ -17,7 +17,7 @@ import timeit
 import pandas as pd
 import numpy as np
 
-from mlearning.scoringMethods import scoring_model
+from mlearning.scoring import ScoringModel
 
 import warnings
 warnings.filterwarnings(action="ignore", category=FutureWarning)
@@ -67,7 +67,7 @@ for j in range(1,30):
         rf_clf = RandomForestClassifier(n_estimators=1000, max_depth=j, n_jobs=-1)
         rf_clf.fit(x_train_s, y_train)
         y_pred_rf = rf_clf.predict((x_test_s[x_train_s.columns]))
-        acc_rf = scoring_model(y_test, y_pred_rf)
+        acc_rf = ScoringModel(y_test, y_pred_rf)
 
     if min(cv_ls) > 0.5:
         boost_ele = RandomForestClassifier(n_estimators=100, max_depth=j, n_jobs=-1)
@@ -91,7 +91,7 @@ print(list(zip(names, boostadd)))
 adaboost = AdaBoostClassifier(base_estimator=votingClf, n_estimators=num_cls, algorithm='SAMME')
 adaboost.fit(x_train_s, y_train)
 y_pred_adaboost = adaboost.predict(x_test_s)
-acc_adaboost = scoring_model(y_test, y_pred_adaboost)
+acc_adaboost = ScoringModel(y_test, y_pred_adaboost)
 acc4 = {'gmean' : acc_adaboost.gmean(),
         'LP' : acc_adaboost.LP(),
         'LR' : acc_adaboost.LR(),

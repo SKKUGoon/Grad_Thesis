@@ -10,6 +10,7 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 
+from mlearning.scoring import ScoringModel
 from mlearning.AdaboostM import AdaboostClassifierES
 
 import tensorflow as tf
@@ -127,7 +128,7 @@ test_size = 30  # 1 month
 
 actual = list()
 pr = list()
-for i in range(6):  # FIXME: for 48 month
+for i in range(40):  # FIXME: for 40 month
     # Split Data
     X_train, y_train = (X[(0 + test_size * i) : (train_size + test_size * i)],
                         y[(0 + test_size * i) : (train_size + test_size * i)])
@@ -149,8 +150,20 @@ for i in range(6):  # FIXME: for 48 month
     # Predict
     X_test_np = scale.transform(X_test)
     X_test = pd.DataFrame(X_test_np, index=X_test.index, columns=X_test.columns)
-    print(f'predict: {i + 1}/{12}')
+    print(f'predict: {i + 1}/{40}')
 
     pred = c.predict(X_test)
     pr.append(pred)
     actual.append(y_test.to_numpy().tolist())
+
+# Prediction and actual result to list
+for i in range(2):
+    actual = sum(actual, [])
+
+pr = list(map(lambda x: x.tolist(), pr))
+pr = sum(pr, [])
+
+# Calculate Accuracy
+scr = ScoringModel(actual, pr)
+print(f'weighted accuracy: {scr.accuracy(weight="weighted")}')
+print(f'non-weighted accuracy: {scr.accuracy()}')

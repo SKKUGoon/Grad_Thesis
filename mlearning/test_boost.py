@@ -11,7 +11,7 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 
-from mlearning.scoringMethods import scoring_model
+from mlearning.scoring import ScoringModel
 from mlearning.AdaboostM import AdaboostClassifierES
 
 import tensorflow as tf

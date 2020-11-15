@@ -10,7 +10,7 @@ from sklearn import svm
 
 import matplotlib.pyplot as plt
 
-from mlearning.scoringMethods import scoring_model
+from mlearning.scoring import ScoringModel
 from mlearning.AdaboostM import AdaboostClassifierES
 
 import warnings
@@ -65,7 +65,7 @@ for i in range(1):
 
     a.fit(x_train_s,y_train)
     p = a.predict(x_test_s)
-    b = scoring_model(y_ls, list(p))
+    b = ScoringModel(y_ls, list(p))
     print(b.accuracy(weight='weighted'))
 
     ss = a.get_iter_prediction()
@@ -91,7 +91,7 @@ for i in range(1):
     cp = a.get_iter_cumul_prediction()
     pppp = list()
     for i in cp:
-        bb = scoring_model(y_ls, i)
+        bb = ScoringModel(y_ls, i)
         pppp.append(bb.accuracy(weight='weighted'))
     pppp = np.array(pppp)
     big_pppp.append(pppp)

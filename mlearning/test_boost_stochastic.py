@@ -10,7 +10,7 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 
-from mlearning.scoringMethods import scoring_model
+from mlearning.scoring import ScoringModel
 from mlearning.AdaboostM import AdaboostClassifierES
 
 import tensorflow as tf
@@ -103,7 +103,7 @@ for i in range(100):
 
     a.stochastic_fit(x_train_s, y_train)
     p1 = a.predict(x_test_s)
-    b1 = scoring_model(y_ls, list(p1))
+    b1 = ScoringModel(y_ls, list(p1))
     acc = b1.accuracy(weight='weighted')
     res.append(acc)
 
