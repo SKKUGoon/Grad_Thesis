@@ -109,13 +109,17 @@ svc = SVC(gamma='auto')
 #         rf1, rf2, rf3, rf4, rf5, rf6, rf7, rf8, rf9, rf10, rf11, rf12, rf13, rf14, rf15, rf16, rf17, rf18,
 #         n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, svc]
 
+#clf_ls =[dt1, dt3, dt5, dt7, dt9, dt11,
+#         rf1, rf3, rf5, rf7, rf9, rf11, rf13, rf15, rf17,
+#         n1, n3, n5, n7, n9, n11, svc]
 
+clf_ls =[dt1, dt5, dt9,
+         rf1, rf5, rf9, rf13, rf17,
+         n1, n5, n9, svc]
 
-#clf_ls =[dt1, dt5, dt9,
-#         rf1, rf5, rf9, rf13, rf17,
-#         n1, n5, n9, svc]
-
-clf_ls =[n1, n5, n9]
+clf_name = ['dt1', 'dt5', 'dt9',
+            'rf1', 'rf5', 'rf9', 'rf13', 'rf17',
+            'n1', 'n5', 'n9', 'svc']
 
 # Data
 X = pd.read_pickle(r'D:\Data\Grad\X_selected.pkl')
@@ -125,61 +129,75 @@ y = pd.read_pickle(r'D:\Data\Grad\y_selected.pkl')
 train_size = 365 * 3  # 3 years
 test_size = 30  # 1 month
 
-iteration_pred_res = list()
-iteration_acc_w = list()
-iteration_acc_stats = list()
-for i in range(10):  # 10 iterations
-    actual_sto_boost = list()
-    pr_sto_boost = list()
-    for i in range(40):
-        # Split Data
-        X_train, y_train = (X[(0 + test_size * i) : (train_size + test_size * i)],
-                            y[(0 + test_size * i) : (train_size + test_size * i)])
+total_res = dict()
+clf_index = 0
+for classf in clf_ls:
+    iteration_acc_w = list()
+    iteration_acc_stats = list()
+    for i in range(10):  # 10 iterations
+        actual_sto_boost = list()
+        pr_sto_boost = list()
+        for i in range(40):
+            # Split Data
+            X_train, y_train = (X[(0 + test_size * i) : (train_size + test_size * i)],
+                                y[(0 + test_size * i) : (train_size + test_size * i)])
 
-        X_test, y_test = (X[(train_size + test_size * i):(train_size + test_size * (i + 1))],
-                          y[(train_size + test_size * i):(train_size + test_size * (i + 1))])
+            X_test, y_test = (X[(train_size + test_size * i):(train_size + test_size * (i + 1))],
+                              y[(train_size + test_size * i):(train_size + test_size * (i + 1))])
 
-        # Scale
-        scale = StandardScaler()
-        scale.fit(X_train)
-        X_train_np = scale.transform(X_train)  # Scaled. np.array
-        X_train = pd.DataFrame(X_train_np, index=X_train.index, columns=X_train.columns)
+            # Scale
+            scale = StandardScaler()
+            scale.fit(X_train)
+            X_train_np = scale.transform(X_train)  # Scaled. np.array
+            if 'n' not in clf_name[clf_index]:  # neural net takes in numpy.ndarray only
+                X_train = pd.DataFrame(X_train_np, index=X_train.index, columns=X_train.columns)
+            else:
+                X_train = X_train_np
+                y_train = y_train.to_numpy()
 
-        # Fit
-        c = AdaboostClassifierES(clf_ls, max_iter=30, early_stopping=False)
-        c.stochastic_fit(X_train, y_train)
-        print(f'fit: {i + 1}/{40}')
+            # Fit
+            c = copy.deepcopy(classf)
+            c.fit(X_train, y_train)
+            print(f'fit: {i + 1}/{40}')
 
-        # Predict
-        X_test_np = scale.transform(X_test)
-        X_test = pd.DataFrame(X_test_np, index=X_test.index, columns=X_test.columns)
-        print(f'predict: {i + 1}/{40}')
+            # Predict
+            X_test_np = scale.transform(X_test)
+            if 'n' not in clf_name[clf_index]:
+                X_test = pd.DataFrame(X_test_np, index=X_test.index, columns=X_test.columns)
+            else:
+                X_test = X_test_np
+            print(f'predict: {i + 1}/{40}')
 
-        pred = c.predict(X_test)
-        pr_sto_boost.append(pred)
-        actual_sto_boost.append(y_test.to_numpy().tolist())
+            pred = c.predict(X_test)
+            pr_sto_boost.append(pred)
+            actual_sto_boost.append(y_test.to_numpy().tolist())
 
-    # Prediction and actual result to list
-    for i in range(2):
-        actual_sto_boost = sum(actual_sto_boost, [])
+        # Prediction and actual result to list
+        for i in range(2):
+            actual_sto_boost = sum(actual_sto_boost, [])
 
-    pr_sto_boost = list(map(lambda x: x.tolist(), pr_sto_boost))
-    pr_sto_boost = sum(pr_sto_boost, [])
+        pr_sto_boost = list(map(lambda x: x.tolist(), pr_sto_boost))
+        pr_sto_boost = sum(pr_sto_boost, [])
+        if 'n' in clf_name[clf_index]:
+            pr_sto_boost = sum(pr_sto_boost, [])
+        # Calculate Accuracy
+        scr = ScoringModel(actual_sto_boost, pr_sto_boost)
+        iteration_acc_w.append(scr.accuracy(weight="weighted"))
+        stats = [scr.accuracy(), scr.TP, scr.TN, scr.FP, scr.FN]
+        iteration_acc_stats.append(stats)
 
-    # Calculate Accuracy
-    scr = ScoringModel(actual_sto_boost, pr_sto_boost)
-    iteration_acc_w.append(scr.accuracy(weight="weighted"))
-    stats = [scr.accuracy(), scr.TP, scr.TN, scr.FP, scr.FN]
-    iteration_acc_stats.append(stats)
+        print(f'weighted accuracy: {scr.accuracy(weight="weighted")}')
+        print(f'non-weighted accuracy: {scr.accuracy()}')
 
-    print(f'weighted accuracy: {scr.accuracy(weight="weighted")}')
-    print(f'non-weighted accuracy: {scr.accuracy()}')
+    # Save as dict
+    total_res[clf_name[clf_index]+'acc'] = iteration_acc_w
+    total_res[clf_name[clf_index]+'stats'] = iteration_acc_stats
+    clf_index += 1
+    print(f'{clf_name[clf_index]} done')
 
 # Save as pickle
-with open(r'D:\Data\Grad\res_sto_boost2.pkl', 'wb') as file:
-    pickle.dump(iteration_acc_w, file)
-with open(r'D:\Data\Grad\res_raw_sto_boost2.pkl', 'wb') as file:
-    pickle.dump(iteration_acc_stats, file)
+with open(r'D:\Data\Grad\res_individual.pkl', 'wb') as file:
+    pickle.dump(total_res, file)
 
 # Finish Beep
 duration = 1000

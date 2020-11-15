@@ -8,7 +8,7 @@ from sklearn.ensemble import RandomForestClassifier
 
 import matplotlib.pyplot as plt
 
-from mlearning.scoringMethods import scoring_model
+from mlearning.scoring import ScoringModel
 
 import warnings
 warnings.filterwarnings(action = "ignore", category = FutureWarning)
@@ -53,7 +53,7 @@ for j in range(1,50,2):
         rf_clf = RandomForestClassifier(n_estimators=num_trees, max_depth=j, n_jobs=-1)
         rf_clf.fit(x_train_s, y_train)
         y_pred_rf = rf_clf.predict((x_test_s[x_train_s.columns]))
-        acc_rf = scoring_model(y_test, y_pred_rf)
+        acc_rf = ScoringModel(y_test, y_pred_rf)
 
         robust_acc.append(acc_rf.accuracy(weight='weighted'))
     acc[f'max_depth = {j}'] = robust_acc

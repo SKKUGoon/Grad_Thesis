@@ -7,7 +7,7 @@ from sklearn import svm
 
 import matplotlib.pyplot as plt
 
-from mlearning.scoringMethods import scoring_model
+from mlearning.scoring import ScoringModel
 
 import warnings
 warnings.filterwarnings(action = "ignore", category = FutureWarning)
@@ -62,7 +62,7 @@ for c_val in [1, 50, 100]:
         pred = m.predict(x_test_s)
 
         # Metrics
-        t = scoring_model(y_test, pred)
+        t = ScoringModel(y_test, pred)
         sens_sigma.append(t.sensitivity())
         spec_sigma.append(t.specificity())
         gm_sigma.append(t.gmean())

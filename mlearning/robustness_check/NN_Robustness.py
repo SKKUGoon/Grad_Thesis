@@ -9,7 +9,7 @@ from sklearn.model_selection import train_test_split
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
 
-from mlearning.scoringMethods import scoring_model
+from mlearning.scoring import ScoringModel
 
 import warnings
 import matplotlib.pyplot as plt
@@ -149,7 +149,7 @@ for i in floatspace(0.31, 0.49):
         t = dnn_(op, len(op), i, 'relu', x_train, y_train)
         pred = res_class(t, x_test)
 
-        m = scoring_model(y_test, pred)
+        m = ScoringModel(y_test, pred)
         acclist.append(m.accuracy())
     nnacc[f'dropout: {i}'] = acclist
     print(np.mean(acclist))
