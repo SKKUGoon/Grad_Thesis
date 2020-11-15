@@ -131,7 +131,7 @@ iteration_acc_stats = list()
 for i in range(10):  # 10 iterations
     actual_sto_boost = list()
     pr_sto_boost = list()
-    for i in range(40):  # FIXME: for 40 month
+    for i in range(40):
         # Split Data
         X_train, y_train = (X[(0 + test_size * i) : (train_size + test_size * i)],
                             y[(0 + test_size * i) : (train_size + test_size * i)])
@@ -148,7 +148,7 @@ for i in range(10):  # 10 iterations
         # Fit
         c = AdaboostClassifierES(clf_ls, max_iter=50, early_stopping=False)
         c.stochastic_fit(X_train, y_train)
-        print(f'fit: {i + 1}/{12}')
+        print(f'fit: {i + 1}/{40}')
 
         # Predict
         X_test_np = scale.transform(X_test)
