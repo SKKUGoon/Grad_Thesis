@@ -19,8 +19,7 @@ from tensorflow.keras.wrappers.scikit_learn import KerasClassifier
 import copy
 import datetime
 
-import warnings
-
+import winsound
 
 def nn1():
     inp = 66
@@ -126,44 +125,57 @@ y = pd.read_pickle(r'D:\Data\Grad\y_selected.pkl')
 train_size = 365 * 3  # 3 years
 test_size = 30  # 1 month
 
-actual = list()
-pr = list()
-for i in range(40):  # FIXME: for 40 month
-    # Split Data
-    X_train, y_train = (X[(0 + test_size * i) : (train_size + test_size * i)],
-                        y[(0 + test_size * i) : (train_size + test_size * i)])
+iteration_pred_res = list()
+iteration_acc_w = list()
+iteration_acc_stats = list()
+for i in range(10):  # 10 iterations
+    actual_sto_boost = list()
+    pr_sto_boost = list()
+    for i in range(40):  # FIXME: for 40 month
+        # Split Data
+        X_train, y_train = (X[(0 + test_size * i) : (train_size + test_size * i)],
+                            y[(0 + test_size * i) : (train_size + test_size * i)])
 
-    X_test, y_test = (X[(train_size + test_size * i):(train_size + test_size * (i + 1))],
-                      y[(train_size + test_size * i):(train_size + test_size * (i + 1))])
+        X_test, y_test = (X[(train_size + test_size * i):(train_size + test_size * (i + 1))],
+                          y[(train_size + test_size * i):(train_size + test_size * (i + 1))])
 
-    # Scale
-    scale = StandardScaler()
-    scale.fit(X_train)
-    X_train_np = scale.transform(X_train)  # Scaled. np.array
-    X_train = pd.DataFrame(X_train_np, index=X_train.index, columns=X_train.columns)
+        # Scale
+        scale = StandardScaler()
+        scale.fit(X_train)
+        X_train_np = scale.transform(X_train)  # Scaled. np.array
+        X_train = pd.DataFrame(X_train_np, index=X_train.index, columns=X_train.columns)
 
-    # Fit
-    c = AdaboostClassifierES(clf_ls, max_iter=50, early_stopping=False)
-    c.stochastic_fit(X_train, y_train)
-    print(f'fit: {i + 1}/{12}')
+        # Fit
+        c = AdaboostClassifierES(clf_ls, max_iter=50, early_stopping=False)
+        c.stochastic_fit(X_train, y_train)
+        print(f'fit: {i + 1}/{12}')
 
-    # Predict
-    X_test_np = scale.transform(X_test)
-    X_test = pd.DataFrame(X_test_np, index=X_test.index, columns=X_test.columns)
-    print(f'predict: {i + 1}/{40}')
+        # Predict
+        X_test_np = scale.transform(X_test)
+        X_test = pd.DataFrame(X_test_np, index=X_test.index, columns=X_test.columns)
+        print(f'predict: {i + 1}/{40}')
 
-    pred = c.predict(X_test)
-    pr.append(pred)
-    actual.append(y_test.to_numpy().tolist())
+        pred = c.predict(X_test)
+        pr_sto_boost.append(pred)
+        actual_sto_boost.append(y_test.to_numpy().tolist())
 
-# Prediction and actual result to list
-for i in range(2):
-    actual = sum(actual, [])
+    # Prediction and actual result to list
+    for i in range(2):
+        actual_sto_boost = sum(actual_sto_boost, [])
 
-pr = list(map(lambda x: x.tolist(), pr))
-pr = sum(pr, [])
+    pr_sto_boost = list(map(lambda x: x.tolist(), pr_sto_boost))
+    pr_sto_boost = sum(pr_sto_boost, [])
 
-# Calculate Accuracy
-scr = ScoringModel(actual, pr)
-print(f'weighted accuracy: {scr.accuracy(weight="weighted")}')
-print(f'non-weighted accuracy: {scr.accuracy()}')
+    # Calculate Accuracy
+    scr = ScoringModel(actual_sto_boost, pr_sto_boost)
+    iteration_acc_w.append(scr.accuracy(weight="weighted"))
+    stats = [scr.accuracy(), scr.TP, scr.TN, scr.FP, scr.FN]
+    iteration_acc_stats.append(stats)
+
+    print(f'weighted accuracy: {scr.accuracy(weight="weighted")}')
+    print(f'non-weighted accuracy: {scr.accuracy()}')
+
+# Finish Beep
+duration = 1000
+freq = 440
+winsound.Beep(freq, duration)
