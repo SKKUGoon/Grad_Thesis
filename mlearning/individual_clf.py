@@ -130,11 +130,12 @@ train_size = 365 * 3  # 3 years
 test_size = 30  # 1 month
 
 total_res = dict()
+class_res = dict()
 clf_index = 0
 for classf in clf_ls:
     iteration_acc_w = list()
     iteration_acc_stats = list()
-    for i in range(10):  # 10 iterations
+    for i in range(1):  # 10 iterations
         actual_sto_boost = list()
         pr_sto_boost = list()
         for i in range(40):
@@ -192,11 +193,12 @@ for classf in clf_ls:
     # Save as dict
     total_res[clf_name[clf_index]+'acc'] = iteration_acc_w
     total_res[clf_name[clf_index]+'stats'] = iteration_acc_stats
+    class_res[clf_name[clf_index]+'pred'] = pr_sto_boost
     clf_index += 1
     print(f'{clf_name[clf_index]} done')
 
 # Save as pickle
-with open(r'D:\Data\Grad\res_individual.pkl', 'wb') as file:
+with open(r'D:\Data\Grad\res_individual_plot.pkl', 'wb') as file:
     pickle.dump(total_res, file)
 
 # Finish Beep
